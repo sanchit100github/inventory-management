@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -31,9 +32,9 @@ public class ProductService {
     }
 
     // Save new product
-    public boolean saveProduct(Product product) {
-        Product savedProduct = productRepository.save(product);  // Save the product
-        return savedProduct != null;  // Check if the product is saved and return true/false
+    public Product saveProduct(Product product) {
+        product.setTimestamp(LocalDateTime.now());
+        return productRepository.save(product);  // Save the product
     }
 
     // Update product
@@ -42,14 +43,14 @@ public class ProductService {
         if (existingProduct.isPresent()) {
             Product updatedProduct = existingProduct.get();
             updatedProduct.setName(product.getName());
-            updatedProduct.setMaincategory(product.getMaincategory());
-            updatedProduct.setSubcategory(product.getSubcategory());
+            updatedProduct.setMainCategory(product.getMainCategory());
+            updatedProduct.setSubCategory(product.getSubCategory());
             updatedProduct.setDescription(product.getDescription());
-            updatedProduct.setPrice(product.getPrice());
-            updatedProduct.setCost(product.getCost());
             updatedProduct.setStockLevel(product.getStockLevel());
             updatedProduct.setReorderLevel(product.getReorderLevel());
-            updatedProduct.setSupplier(product.getSupplier());
+            if(updatedProduct.getActive().equals(false) && product.getActive().equals(true)) {
+                updatedProduct.setTimestamp(LocalDateTime.now());
+            }
             return productRepository.save(updatedProduct);
         }
         return null; // Or throw an exception if the product is not found
@@ -57,7 +58,11 @@ public class ProductService {
 
     // Delete product by ID
     public void deleteProduct(String id) {
-        productRepository.deleteById(id);
+        Optional<Product> existingProduct = productRepository.findById(id);
+        if(existingProduct.isPresent()) {
+            existingProduct.get().setActive(false);
+            productRepository.save(existingProduct.get());
+        }
     }
 
     public String getManagerRoleByCategory(String category) {
@@ -144,5 +149,27 @@ public class ProductService {
         }
 
         return mongoTemplate.find(query, Product.class);  // Execute the query using MongoTemplate
+    }
+
+	public List<Product> getByActiveAndMonthAndYearAndRole(String role, Integer month, Integer year) {
+		List<Product> products = productRepository.findAllByMainCategoryAndActive(role);
+        List<Product> finalList = new ArrayList<>();
+        for(Product it : products) {
+            if(it.getTimestamp().getMonthValue() == month && it.getTimestamp().getYear() == year) {
+                finalList.add(it);
+            }
+        }
+        return finalList;
+	}
+
+    public List<Product> getByNotActiveAndMonthAndYearAndRole(String role, Integer month, Integer year) {
+        List<Product> products = productRepository.findAllByMainCategoryAndActiveFalse(role);
+        List<Product> finalList = new ArrayList<>();
+        for(Product it : products) {
+            if(it.getTimestamp().getMonthValue() == month && it.getTimestamp().getYear() == year) {
+                finalList.add(it);
+            }
+        }
+        return finalList;
     }
 }

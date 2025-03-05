@@ -24,7 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (user.isPresent()) {
             System.out.println("User Found: " + user.get().getEmail());
             System.out.println("Stored Password: " + user.get().getPassword());
-            System.out.println("Roles: " + user.get().getRoles());
+            System.out.println("Roles: " + user.get().getAssigned());
             return org.springframework.security.core.userdetails.User.builder()
                     .username(user.get().getEmail())
                     .password(user.get().getPassword()) // Password must be BCrypt encoded

@@ -16,7 +16,7 @@ public class SupplierService {
 
     // Get all suppliers
     public List<Supplier> getAllSuppliers() {
-        return supplierRepository.findAll();
+        return supplierRepository.findAllByActive();
     }
 
     // Get supplier by ID
@@ -31,8 +31,8 @@ public class SupplierService {
     }
 
     // Update supplier
-    public Supplier updateSupplier(String id, Supplier supplier) {
-        Optional<Supplier> existingSupplier = supplierRepository.findById(id);
+    public Supplier updateSupplier(Supplier supplier) {
+        Optional<Supplier> existingSupplier = supplierRepository.findById(supplier.getSupplierId());
         if (existingSupplier.isPresent()) {
             Supplier updatedSupplier = existingSupplier.get();
             
@@ -51,7 +51,14 @@ public class SupplierService {
 
     // Delete supplier by ID
     public void deleteSupplier(String id) {
-        supplierRepository.deleteById(id);
+        Optional<Supplier> existingSupplier = supplierRepository.findById(id);
+        if (existingSupplier.isPresent()) {
+            Supplier updatedSupplier = existingSupplier.get();
+            
+            updatedSupplier.setActive(false);
+            supplierRepository.save(updatedSupplier);
+        }
+        
     }
 
     // Validate product types
@@ -69,4 +76,5 @@ public class SupplierService {
     public List<Supplier> findSuppliersByAddress(String address) {
         return supplierRepository.findByAddressContainingIgnoreCase(address);
     }
+
 }

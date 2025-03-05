@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 public class CustomerService {
@@ -30,8 +31,8 @@ public class CustomerService {
     }
 
     // Update customer
-    public Customer updateCustomer(String id, Customer customer) {
-        Optional<Customer> existingCustomer = customerRepository.findById(id);
+    public Customer updateCustomer(Customer customer) {
+        Optional<Customer> existingCustomer = customerRepository.findById(customer.getCustomerId());
         if (existingCustomer.isPresent()) {
             Customer updatedCustomer = existingCustomer.get();
             updatedCustomer.setName(customer.getName());
@@ -45,6 +46,17 @@ public class CustomerService {
 
     // Delete customer by ID
     public void deleteCustomer(String id) {
-        customerRepository.deleteById(id);
+        Optional<Customer> existingCustomer = customerRepository.findById(id);
+        if (existingCustomer.isPresent()) {
+            Customer updatedCustomer = existingCustomer.get();
+            
+            updatedCustomer.setActive(false);
+            customerRepository.save(updatedCustomer);
+        }
+    }
+
+    public Customer addNewCustomer(Customer customer) {
+        customer.setAdded(LocalDateTime.now());
+        return customerRepository.save(customer);
     }
 }

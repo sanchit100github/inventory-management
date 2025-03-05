@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.inventory_management.model.AuditLog;
 import com.example.inventory_management.model.Product;
-import com.example.inventory_management.model.Role;
 import com.example.inventory_management.model.User;
 import com.example.inventory_management.repository.UserRepository;
 import com.example.inventory_management.service.AuditLogService;
 import com.example.inventory_management.service.ProductService;
+import com.example.inventory_management.service.SupplierService;
 import com.example.inventory_management.service.UserService;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,22 +36,18 @@ public class EmployeeController {
     UserService userService;
 
     @Autowired
+    SupplierService supplierService;
+
+    @Autowired
     AuditLogService auditLogService;
 
     @GetMapping("/getproductcategory") 
     public ResponseEntity<?> getPoductCategory() {
-        boolean hasRole = false;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String name = authentication.getName();
         Optional<User> user = userRepository.findByEmailAndActive(name, true);
         if(user.isPresent()) {
-            for(Role it : user.get().getRoles()) {
-                if(it.getName().startsWith("EMPLOYEE")) {
-                    hasRole = true;
-                    break;
-                }
-            }
-            if(hasRole) {
+            if(user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
                 List<String> categories = userService.getCategories(user.get());
                 return new ResponseEntity<>(categories,HttpStatus.OK);
             }
@@ -59,25 +55,23 @@ public class EmployeeController {
         }
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
-    
-    @PostMapping("/addnewproduct") 
-    public ResponseEntity<?> addNewProduct(@RequestBody Product product) {
-        boolean hasRole = false;
+
+    private Optional<User> getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String name = authentication.getName();
         Optional<User> user = userRepository.findByEmailAndActive(name, true);
+        return user;
+    }
+    
+    @PostMapping("/createnewproduct") 
+    public ResponseEntity<?> createNewProduct(@RequestBody Product product) {
+        Optional<User> user = getUser();
         if(user.isPresent()) {
-            for(Role it : user.get().getRoles()) {
-                if(it.getName().startsWith("EMPLOYEE")) {
-                    hasRole = true;
-                    break;
-                }
-            }
-            if(hasRole) {
-                boolean test = productService.saveProduct(product);
-                if(test) {
-                    String access = productService.getManagerRoleByCategory(product.getMaincategory());
-                    AuditLog log = new AuditLog(name, "ADD", "Added " + product.getName(), List.of(access));
+            if(user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
+                product.setAddedby(user.get().getAssigned());
+                Product test = productService.saveProduct(product);
+                if(test != null) {
+                    AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added product " + product.getName(), List.of(user.get().getAssigned().getAddedby()));
                     auditLogService.saveAudit(log);
                     return new ResponseEntity<>("Product has been added", HttpStatus.OK);
                 } else {
@@ -92,27 +86,16 @@ public class EmployeeController {
     
     @PutMapping("/updateproduct")
     public ResponseEntity<?> updateProduct(@RequestBody Product product) {
-        boolean hasRole = false;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String name = authentication.getName();
-        Optional<User> user = userRepository.findByEmailAndActive(name, true);
-
+        Optional<User> user = getUser();
         if (user.isPresent()) {
-            for (Role it : user.get().getRoles()) {
-                if (it.getName().startsWith("EMPLOYEE")) {
-                    hasRole = true;
-                    break;
-                }
-            }
-            if (hasRole) {
+            if (user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
                 List<String> categories = userService.getCategories(user.get());
-                if(categories.contains(product.getMaincategory())) {
+                if(categories.contains(product.getMainCategory())) {
                     Optional<Product> existingProduct = productService.getProductById(product.getProductId());
                     if (existingProduct.isPresent()) {
                         Product updatedProduct = productService.updateProduct(product.getProductId(), product);
                         if (updatedProduct!=null) {
-                            String access = productService.getManagerRoleByCategory(product.getMaincategory());
-                            AuditLog log = new AuditLog(name, "UPDATE", "Updated " + updatedProduct.getName(), List.of(access));
+                            AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated product " + updatedProduct.getName(), List.of(user.get().getAssigned().getAddedby()));
                             auditLogService.saveAudit(log);
                             return new ResponseEntity<>("Product has been updated", HttpStatus.OK);
                         } else {
@@ -132,22 +115,12 @@ public class EmployeeController {
     @GetMapping("/getproduct")
     public ResponseEntity<?> getProduct(@RequestBody Map<String, String> requestBody) {
         String id = requestBody.get("id");
-        boolean hasRole = false;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String name = authentication.getName();
-        Optional<User> user = userRepository.findByEmailAndActive(name, true);
-
+        Optional<User> user = getUser();
         if (user.isPresent()) {
-            for (Role it : user.get().getRoles()) {
-                if (it.getName().startsWith("EMPLOYEE")) {
-                    hasRole = true;
-                    break;
-                }
-            }
-            if (hasRole) {
+            if (user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
                 List<String> categories = userService.getCategories(user.get());
                 Optional<Product> existingProduct = productService.getProductById(id);
-                if(existingProduct.isPresent() && categories.contains(existingProduct.get().getMaincategory())) {
+                if(existingProduct.isPresent() && categories.contains(existingProduct.get().getMainCategory())) {
                     return new ResponseEntity<>(existingProduct,HttpStatus.OK);
                 }
                 else {
@@ -163,25 +136,15 @@ public class EmployeeController {
     @PutMapping("/deleteproduct")
     public ResponseEntity<?> deteteProduct(@RequestBody Map<String, String> requestBody) {
         String id = requestBody.get("id");
-        boolean hasRole = false;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String name = authentication.getName();
-        Optional<User> user = userRepository.findByEmailAndActive(name, true);
+        Optional<User> user = getUser();
         if (user.isPresent()) {
-            for (Role it : user.get().getRoles()) {
-                if (it.getName().startsWith("EMPLOYEE")) {
-                    hasRole = true;
-                    break;
-                }
-            }
-            if (hasRole) {
+            if (user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
                 List<String> categories = userService.getCategories(user.get());
                 Optional<Product> existingProduct = productService.getProductById(id);
                 Product product = existingProduct.get();
-                if(existingProduct.isPresent() && categories.contains(existingProduct.get().getMaincategory())) {
+                if(existingProduct.isPresent() && categories.contains(existingProduct.get().getMainCategory())) {
                     productService.deleteProduct(id);
-                    String access = productService.getManagerRoleByCategory(product.getMaincategory());
-                    AuditLog log = new AuditLog(name, "DELETE", "deleted " + product.getName(), List.of(access));
+                    AuditLog log = new AuditLog(user.get().getEmail(), "DELETE", "deleted product " + product.getName(), List.of(user.get().getAssigned().getAddedby()));
                     auditLogService.saveAudit(log);
                 }
                 else {

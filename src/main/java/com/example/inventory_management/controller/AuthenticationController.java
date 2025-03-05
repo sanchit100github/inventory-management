@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.inventory_management.model.LoginRequest;
-import com.example.inventory_management.model.Role;
 import com.example.inventory_management.model.User;
 import com.example.inventory_management.repository.UserRepository;
 
@@ -44,17 +43,15 @@ public class AuthenticationController {
             String name = authentication.getName();
             Optional<User> user = userRepository.findByEmailAndActive(name, true);
             if(user.isPresent()) {
-                for(Role it : user.get().getRoles()) {
-                    if(it.getName().equals("ADMIN")) {
-                        return new ResponseEntity<>("ADMIN", HttpStatus.OK);
-                    }
-                    else if(it.getName().startsWith("MANAGER")) {
-                        return new ResponseEntity<>("MANAGER", HttpStatus.OK);
-                    }
-                    else if(it.getName().startsWith("EMPLOYEE")) {
-                        return new ResponseEntity<>("EMPLOYEE", HttpStatus.OK);
-                    }
+                if(user.get().getAssigned().getName().equals("ADMIN")) {
+                    return new ResponseEntity<>("ADMIN", HttpStatus.OK);
                 }
+                else if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+                    return new ResponseEntity<>("MANAGER", HttpStatus.OK);
+                }
+                else if(user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
+                    return new ResponseEntity<>("EMPLOYEE", HttpStatus.OK);
+                }  
             }
             return new ResponseEntity<>("User has no valid role", HttpStatus.FORBIDDEN);
         } catch (BadCredentialsException e) {

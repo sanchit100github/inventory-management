@@ -2,6 +2,8 @@ package com.example.inventory_management.model;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,6 +14,8 @@ public class Customer {
     private String customerId;      // Unique identifier for each customer
     private String name;       // First name of the customer
     private String email;           // Email address of the customer
+    private boolean active;
     private String contact;     // Phone number of the customer
     private String address;         // Shipping address of the customer
+    private LocalDateTime added;
 }

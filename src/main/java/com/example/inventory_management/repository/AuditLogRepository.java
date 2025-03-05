@@ -2,9 +2,12 @@ package com.example.inventory_management.repository;
 
 import com.example.inventory_management.model.AuditLog;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Repository
 public interface AuditLogRepository extends MongoRepository<AuditLog, String> {
     
     // Find logs by the user who has access to them (role-based filtering)

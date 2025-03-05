@@ -12,6 +12,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+// import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import com.example.inventory_management.service.UserDetailsServiceImpl;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
@@ -32,10 +34,11 @@ public class SpringSecurity {
                         .requestMatchers("/", "/login", "/user/addnew", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/test1").authenticated()
                         .anyRequest().authenticated())
+                // .addFilterBefore(roleAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
