@@ -59,4 +59,13 @@ public class CustomerService {
         customer.setAdded(LocalDateTime.now());
         return customerRepository.save(customer);
     }
+
+    public Optional<Customer> getCustomerByName(String name) {
+        return customerRepository.findByName(name);
+    }
+
+    public Object findCustomersByActive() {
+        return customerRepository.findAllByActive();
+    }
+
 }

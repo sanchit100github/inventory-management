@@ -5,6 +5,7 @@ import java.util.Map;
 import com.example.inventory_management.model.Batch;
 import com.example.inventory_management.model.OrderProduct;
 import com.example.inventory_management.model.Product;
+import com.example.inventory_management.model.TempBatch;
 import com.example.inventory_management.model.User;
 
 import java.util.Optional;
@@ -27,18 +28,33 @@ public class InventoryService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TempBatchService tempBatchService;
+
     @Async
-    public void updateInventory(Map<String, Integer> mapBatches, Map<OrderProduct, Integer> mapProducts) {
+    public void updateInventory(Map<String, Integer> mapBatches, Map<OrderProduct, Integer> mapProducts, String orderId) {
         for (Map.Entry<String, Integer> entry : mapBatches.entrySet()) {
-            Optional<Batch> batch = batchService.getBatchById(entry.getKey());
-            if (batch.isPresent()) {
-                if (entry.getValue().equals(batch.get().getQuantity())) {
-                    Optional<Product> product = productService.getProductById(batch.get().getProductId());
-                    product.get().getBatches().remove(batch.get());
+            Optional<Batch> batchOptional = batchService.getBatchById(entry.getKey());
+            if (batchOptional.isPresent()) {
+                Batch batch = batchOptional.get();
+                TempBatch tempBatch = new TempBatch();
+                tempBatch.setBatchId(batch.getBatchId());
+                tempBatch.setProductId(batch.getProductId());
+                tempBatch.setPrice(batch.getPrice());
+                tempBatch.setCost(batch.getCost());
+                tempBatch.setQuantity(entry.getValue());
+                tempBatch.setSupplierId(batch.getSupplierId());
+                tempBatch.setCreated(batch.getCreated());
+                tempBatch.setOrderId(orderId);
+                tempBatchService.saveBatch(tempBatch);
+
+                if (entry.getValue().equals(batch.getQuantity())) {
+                    Optional<Product> product = productService.getProductById(batch.getProductId());
+                    product.get().getBatches().remove(batch);
                     batchService.deleteBatchById(entry.getKey());  // Remove batch if fully used
                 } else {
-                    batch.get().setQuantity(batch.get().getQuantity() - entry.getValue());
-                    batchService.saveBatch(batch.get());  // Update batch quantity
+                    batch.setQuantity(batch.getQuantity() - entry.getValue());
+                    batchService.saveBatch(batch);  // Update batch quantity
                 }
             }
         }

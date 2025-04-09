@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -26,6 +27,6 @@ public class Product {
     private int stockLevel;  // Stock level of the product
     private int reorderLevel;  // Minimum stock level to trigger reordering
     @DBRef
-    private List<Batch> batches;
+    private List<Batch> batches = new ArrayList<>();
     private Role addedby;
 }

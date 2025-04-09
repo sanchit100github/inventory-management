@@ -26,11 +26,6 @@ public class UserService {
 
     public boolean saveNewUser(User user) {
         try {
-            if (roleRepository.findByName(user.getAssigned().getName()).isEmpty()) {
-                Role role = new Role();
-                role.setName(user.getAssigned().getName());
-                roleRepository.save(role);
-            }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
             return true;
@@ -44,11 +39,6 @@ public class UserService {
     public boolean updateUser(User user) {
         try {
             Optional<User> user1 = userRepository.findById(user.getId());
-            if (roleRepository.findByName(user.getAssigned().getName()).isEmpty()) {
-                Role role = new Role();
-                role.setName(user.getAssigned().getName());
-                roleRepository.save(role);
-            }
             user.setAssigned(user.getAssigned());
             if(!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
                 user.setPassword(passwordEncoder.encode(user.getPassword()));

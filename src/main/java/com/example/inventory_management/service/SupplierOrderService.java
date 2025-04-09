@@ -59,6 +59,7 @@ public class SupplierOrderService {
         return supplierOrderRepository.save(order);
     }
 
+    
     // Update order status
     public SupplierOrder updateOrderStatus(String orderId, String status) {
         Optional<SupplierOrder> existingOrder = supplierOrderRepository.findById(orderId);
@@ -66,7 +67,7 @@ public class SupplierOrderService {
         order.setStatus(status);
         if(status.equals("Completed")) {
             for(OrderProduct it : order.getProducts()) {
-                Optional<Batch> batch = batchService.getBatchByCriteria(it.getProductId(), it.getCostAtOrder(), it.getPriceAtOrder(), it.getSupplierId());
+                Optional<Batch> batch = batchService.getBatchByCriteria(it.getProductId(), it.getCostAtOrder(), it.getPriceAtOrder(), order.getSupplierId());
                 if(batch.isPresent()) {
                     Batch batch1=batch.get();
                     batch1.setQuantity(batch.get().getQuantity()+it.getQuantity());
@@ -77,7 +78,7 @@ public class SupplierOrderService {
                     newBatch.setCost(it.getCostAtOrder());
                     newBatch.setPrice(it.getPriceAtOrder());
                     newBatch.setProductId(it.getProductId());
-                    newBatch.setSupplierId(it.getSupplierId());
+                    newBatch.setSupplierId(order.getSupplierId());
                     newBatch.setQuantity(it.getQuantity());
                     newBatch.setCreated(LocalDateTime.now());
                     batchService.saveBatch(newBatch);

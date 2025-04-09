@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -33,6 +34,7 @@ import com.example.inventory_management.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 
 @RestController
 @RequestMapping("/admin")
@@ -92,6 +94,21 @@ public class AdminController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
+    @GetMapping("/adminprofile")
+    public ResponseEntity<?> getProfile() {
+        Optional<User> user = getUser();
+        if(user.isPresent()) {
+            if(user.get().getAssigned().getName().equals("ADMIN")) {
+                List<Role> roles = userService.getReqRoles(user.get());
+                return new ResponseEntity<>(roles, HttpStatus.OK);
+            }
+            else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
     @PostMapping("/addcategories") 
     public ResponseEntity<?> addCategories(@RequestBody Role role) {
         Optional<User> user = getUser();
@@ -102,10 +119,12 @@ public class AdminController {
                         return new ResponseEntity<>("Category already exists", HttpStatus.CONFLICT);
                     }
                     else {
-                        role.setAddedby(user.get().getAssigned());
-                        role.setName("MANAGER_"+role.getName());
-                        roleRepository.save(role);
-                        user.get().getAssigned().getOwned().add(role);
+                        Role role1 = new Role();
+                        role1.setAddedby(user.get().getAssigned());
+                        role1.setName("MANAGER_"+role.getName());
+                        roleRepository.save(role1);
+                        user.get().getAssigned().getOwned().add(role1);
+                        userRepository.save(user.get());
                         AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added category " + role.getName(), List.of(user.get().getAssigned().getAddedby()));
                         auditLogRepository.save(log);
                         return new ResponseEntity<>("Category is added", HttpStatus.OK);
@@ -236,7 +255,7 @@ public class AdminController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
-                if (!supplierService.getSupplierById(supplier.getSupplierId()).isPresent()) {
+                if (!supplierService.getSupplierByName(supplier.getName()).isPresent()) {
                     try {
                         supplier.setAdded(LocalDateTime.now());
                         supplierService.saveSupplier(supplier);
@@ -248,7 +267,7 @@ public class AdminController {
                         return new ResponseEntity<>("Supplier addition failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
-                    return new ResponseEntity<>("Supplier is already present", HttpStatus.NOT_FOUND);
+                    return new ResponseEntity<>("Supplier is already present with this name", HttpStatus.NOT_FOUND);
                 }
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
@@ -263,6 +282,9 @@ public class AdminController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
                 if (supplierService.getSupplierById(supplier.getSupplierId()).isPresent()) {
+                    if(supplierService.getSupplierByName(supplier.getName()).get().getSupplierId().equals(supplier.getSupplierId())) {
+                        return new ResponseEntity<>("Customer with this name already exists", HttpStatus.CONFLICT);
+                    }
                     try {
                         supplierService.updateSupplier(supplier);
                         AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated supplier " + supplier.getName(), List.of(user.get().getAssigned().getAddedby()));
@@ -308,12 +330,43 @@ public class AdminController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
+    @GetMapping("/getsupplierbyname")
+    public ResponseEntity<?> getSupplierByName(@RequestBody Map<String, String> requestBody) {
+        String name = requestBody.get("name");
+        Optional<User> user = getUser();
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().startsWith("ADMIN")) {
+                if (supplierService.getSupplierByName(name).isPresent()) {
+                    return new ResponseEntity<>(supplierService.getSupplierByName(name).get(), HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Supplier is not present", HttpStatus.NOT_FOUND);
+                }
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
+    @GetMapping("/getsuppliers")
+    public ResponseEntity<?> getActiveSuppliers() {
+        Optional<User> user = getUser();
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().startsWith("ADMIN")) {
+                return new ResponseEntity<>(supplierService.findSuppliersByActive(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
     @PostMapping("/addcustomer")
     public ResponseEntity<?> addCustomer(@RequestBody Customer customer) {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
-                if (!customerService.getCustomerById(customer.getCustomerId()).isPresent()) {
+                if (!customerService.getCustomerByName(customer.getName()).isPresent()) {
                     try {
                         customer.setAdded(LocalDateTime.now());
                         customerService.saveCustomer(customer);
@@ -325,7 +378,7 @@ public class AdminController {
                         return new ResponseEntity<>("Customer addition failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
-                    return new ResponseEntity<>("Customer is already present", HttpStatus.NOT_FOUND);
+                    return new ResponseEntity<>("Customer is already present with this name", HttpStatus.NOT_FOUND);
                 }
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
@@ -340,6 +393,9 @@ public class AdminController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
                 if (customerService.getCustomerById(customer.getCustomerId()).isPresent()) {
+                    if(customerService.getCustomerByName(customer.getName()).get().getCustomerId().equals(customer.getCustomerId())) {
+                        return new ResponseEntity<>("Customer with this name already exists", HttpStatus.CONFLICT);
+                    }
                     try {
                         customerService.updateCustomer(customer);
                         AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated customer " + customer.getName(), List.of(user.get().getAssigned().getAddedby()));
@@ -378,6 +434,37 @@ public class AdminController {
                 } else {
                     return new ResponseEntity<>("Customer is not present", HttpStatus.NOT_FOUND);
                 }
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
+    @GetMapping("/getcustomerbyname")
+    public ResponseEntity<?> getCustomerByName(@RequestBody Map<String, String> requestBody) {
+        String name = requestBody.get("name");
+        Optional<User> user = getUser();
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().startsWith("ADMIN")) {
+                if (customerService.getCustomerByName(name).isPresent()) {
+                    return new ResponseEntity<>(customerService.getCustomerByName(name).get(), HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Customer is not present", HttpStatus.NOT_FOUND);
+                }
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
+    @GetMapping("/getcustomers")
+    public ResponseEntity<?> getActiveCustomers() {
+        Optional<User> user = getUser();
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().startsWith("ADMIN")) {
+                return new ResponseEntity<>(customerService.findCustomersByActive(), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }

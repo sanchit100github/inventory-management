@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,14 +15,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.inventory_management.model.AuditLog;
 import com.example.inventory_management.model.Product;
+import com.example.inventory_management.model.Refill;
 import com.example.inventory_management.model.User;
 import com.example.inventory_management.repository.UserRepository;
 import com.example.inventory_management.service.AuditLogService;
 import com.example.inventory_management.service.ProductService;
 import com.example.inventory_management.service.SupplierService;
 import com.example.inventory_management.service.UserService;
+import com.example.inventory_management.service.RefillService;
 
 import org.springframework.web.bind.annotation.RequestBody;
+
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 
 @RestController("/employee")
 public class EmployeeController {
@@ -40,6 +45,9 @@ public class EmployeeController {
 
     @Autowired
     AuditLogService auditLogService;
+
+    @Autowired
+    RefillService refillService;
 
     @GetMapping("/getproductcategory") 
     public ResponseEntity<?> getPoductCategory() {
@@ -155,6 +163,28 @@ public class EmployeeController {
             }
         }
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);  
+    }
+
+    @PostMapping("/addRefillRequest")
+    public ResponseEntity<?> addRefillRequest(@RequestBody Refill refill) {
+        Optional<User> user = getUser();
+        if(user.isPresent()) {
+            if(user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
+                refill.setAddedBy(user.get().getAssigned());
+                refill.setSentTo(user.get().getAssigned().getAddedby());
+                Refill test = refillService.saveRefill(refill);
+                if(test != null) {
+                    AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added refill request " + refill.getRefillId(), List.of(user.get().getAssigned().getAddedby()));
+                    auditLogService.saveAudit(log);
+                    return new ResponseEntity<>("Request has been added", HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Request was not added", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
 }

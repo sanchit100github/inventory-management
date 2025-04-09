@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -13,7 +14,7 @@ public class CustomerOrder {
     @Id
     private String orderId;     // Unique identifier for each order
     private String customerId;  // Reference to the customer who placed the order
-    private List<OrderProduct> products;  // List of products ordered
+    private List<OrderProduct> products = new ArrayList<>();  // List of products ordered
     private double totalAmount;  // Total price of all products in the order
     private double profitOnProducts;
     private Role orderedby;

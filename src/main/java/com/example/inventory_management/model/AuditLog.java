@@ -18,7 +18,7 @@ public class AuditLog {
     private String action;  // Email used as a unique identifier
     private String description;
     private LocalDateTime timestamp;
-    private List<Role> accessTo;
+    private List<Role> accessTo = new ArrayList<>();
 
     public AuditLog(String actionBy, String action, String description, List<Role> accessTo) {
         this.actionBy = actionBy;

@@ -77,4 +77,13 @@ public class SupplierService {
         return supplierRepository.findByAddressContainingIgnoreCase(address);
     }
 
+    public List<Supplier> findSuppliersByActive() {
+        return supplierRepository.findAllByActive();
+    }
+
+    public Optional<Supplier> getSupplierByName(String name) {
+        return supplierRepository.findByName(name);
+    }
+
+    
 }

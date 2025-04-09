@@ -16,6 +16,8 @@ import com.example.inventory_management.model.LoginRequest;
 import com.example.inventory_management.model.User;
 import com.example.inventory_management.repository.UserRepository;
 
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
+
 @RestController
 public class AuthenticationController {
 

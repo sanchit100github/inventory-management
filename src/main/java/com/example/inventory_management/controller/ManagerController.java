@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,6 +23,7 @@ import com.example.inventory_management.model.Role;
 import com.example.inventory_management.model.SupplierOrder;
 import com.example.inventory_management.model.CustomerOrder;
 import com.example.inventory_management.model.Payment;
+import com.example.inventory_management.model.Refill;
 import com.example.inventory_management.repository.AuditLogRepository;
 import com.example.inventory_management.repository.RoleRepository;
 import com.example.inventory_management.repository.UserRepository;
@@ -30,12 +32,14 @@ import com.example.inventory_management.service.BatchService;
 import com.example.inventory_management.service.CustomerOrderService;
 import com.example.inventory_management.service.PaymentService;
 import com.example.inventory_management.service.ProductService;
+import com.example.inventory_management.service.RefillService;
 import com.example.inventory_management.service.ReportService;
 import com.example.inventory_management.service.SupplierOrderService;
 import com.example.inventory_management.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 
 @RestController
 @RequestMapping("/manager")
@@ -70,6 +74,9 @@ public class ManagerController {
 
     @Autowired
     CustomerOrderService customerOrderService;
+
+    @Autowired 
+    RefillService refillService;
 
     private final ReportService reportService;
 
@@ -112,6 +119,7 @@ public class ManagerController {
                         role.setAddedby(user.get().getAssigned());
                         roleRepository.save(role);
                         user.get().getAssigned().getOwned().add(role);
+                        userRepository.save(user.get());
                         AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added category" + role.getName(), List.of(user.get().getAssigned().getAddedby()));
                         auditLogRepository.save(log);
                         return new ResponseEntity<>("Category is added", HttpStatus.OK);
@@ -335,7 +343,7 @@ public class ManagerController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @PostMapping
+    @PostMapping("/payment/addpayment")
     public ResponseEntity<?> addPayment(@RequestBody Payment payment) {
         Optional<User> user = getUser();
         if (user.isPresent()) {
@@ -359,7 +367,7 @@ public class ManagerController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @PutMapping
+    @PutMapping("/payment/updatepayment")
     public ResponseEntity<?> updatePayment(@RequestBody Payment payment) {
         Optional<User> user = getUser();
         if (user.isPresent()) {
@@ -381,16 +389,48 @@ public class ManagerController {
         }
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
+
+    @GetMapping ("/refill/getrefills")
+    public ResponseEntity<?> getRefills(@RequestBody Map<String, String> requestBody) {
+        String status = requestBody.get("status");
+        Optional<User> user = getUser();
+        if(user.isPresent()) {
+            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+                return new ResponseEntity<>(refillService.getRefillByStatus(status, user.get().getAssigned()), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
+    @PostMapping("/refill/updaterefill")
+    public ResponseEntity<?> updateRefill(@RequestBody Refill refill) {
+        Optional<User> user = getUser();
+        if(user.isPresent()) {
+            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+                if(refillService.updateRefill(refill)!=null) {
+                    return new ResponseEntity<>("Refill is updated", HttpStatus.OK);
+                }
+                else {
+                    return new ResponseEntity<>("Refill is not updated", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
     
     @GetMapping("/generatereport")
-    public ResponseEntity<?> generateAdminReport(@RequestBody Map<String, Integer> requestBody, HttpServletResponse response) throws IOException{
+    public ResponseEntity<?> generateManagerReport(@RequestBody Map<String, Integer> requestBody, HttpServletResponse response) throws IOException{
         Optional<User> user = getUser();
         Integer month = requestBody.get("month");
         Integer year = requestBody.get("year");
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("MANAGER")) {
                 reportService.generateManagerReport(user.get().getAssigned().getName().replaceFirst("^MANAGER", ""), month, year, response);
-                return new ResponseEntity<>("Report is generated", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Report is generated", HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }
