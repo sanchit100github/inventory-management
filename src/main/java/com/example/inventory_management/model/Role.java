@@ -17,6 +17,7 @@ public class Role {
     private String id;
     @Indexed(unique = true)
     private String name; // Name of the role, e.g., "ADMIN", "USER"
+    private String description; // Description of the role
     @DBRef(lazy = true)
     private Role addedby;
     @DBRef(lazy = true)

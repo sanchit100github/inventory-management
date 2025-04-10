@@ -18,8 +18,6 @@ public class InventoryManagementApplication {
 
     @Bean
     public PlatformTransactionManager add(MongoDatabaseFactory dbFactory) {
-        return new MongoTransactionManager(dbFactory); 
+        return new MongoTransactionManager(dbFactory);
     }
 }
-
-// lFc6KVm5IaPsioVI

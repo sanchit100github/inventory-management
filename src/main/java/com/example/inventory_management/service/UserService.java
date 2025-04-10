@@ -29,9 +29,8 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
             return true;
-        } 
-        catch (Exception e) {
-            e.printStackTrace();  
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -40,14 +39,13 @@ public class UserService {
         try {
             Optional<User> user1 = userRepository.findById(user.getId());
             user.setAssigned(user.getAssigned());
-            if(!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
+            if (!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             userRepository.save(user);
             return true;
-        } 
-        catch (Exception e) {
-            e.printStackTrace();  
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -64,15 +62,21 @@ public class UserService {
         return userRepository.findAllByActive(active);
     }
 
-
     public void deleteUser(String email) {
         userRepository.deleteByEmailAndActive(email, true);
     }
 
     public List<Role> getReqRoles(User user) {
         List<Role> roles = new ArrayList<>();
-        for(Role it : user.getAssigned().getOwned()) {
-            roles.add(roleRepository.findByName(it.getName()).get());
+        Role assigned = roleRepository.findById(user.getAssigned().getId()).orElse(null);
+
+        if (assigned != null && assigned.getOwned() != null) {
+            for (Role ownedRole : assigned.getOwned()) {
+                Optional<Role> fullRole = roleRepository.findById(ownedRole.getId());
+                if (fullRole.isPresent() && fullRole.get().getName().startsWith("MANAGER_")) {
+                    roles.add(fullRole.get());
+                }
+            }
         }
         return roles;
     }
@@ -82,5 +86,5 @@ public class UserService {
         categories.add(user.getAssigned().getName().replaceFirst("^EMPLOYEE_", ""));
         return categories;
     }
-    
+
 }
