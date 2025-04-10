@@ -33,31 +33,31 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            // Create an authentication token
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    loginRequest.getEmail(), loginRequest.getPassword());
 
-            // Authenticate the user
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
-            // Set the authentication in the security context
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String name = authentication.getName();
-            Optional<User> user = userRepository.findByEmailAndActive(name, true);
-            if(user.isPresent()) {
-                if(user.get().getAssigned().getName().equals("ADMIN")) {
-                    return new ResponseEntity<>("ADMIN", HttpStatus.OK);
+            String email = authentication.getName();
+            Optional<User> user = userRepository.findByEmailAndActive(email, true);
+
+            if (user.isPresent()) {
+                String roleName = user.get().getAssigned().getName();
+
+                if (roleName.equals("ADMIN")) {
+                    return ResponseEntity.ok(Map.of("email", email, "role", "ADMIN"));
+                } else if (roleName.startsWith("MANAGER")) {
+                    return ResponseEntity.ok(Map.of("email", email, "role", "MANAGER"));
+                } else if (roleName.startsWith("EMPLOYEE")) {
+                    return ResponseEntity.ok(Map.of("email", email, "role", "EMPLOYEE"));
                 }
-                else if(user.get().getAssigned().getName().startsWith("MANAGER")) {
-                    return new ResponseEntity<>("MANAGER", HttpStatus.OK);
-                }
-                else if(user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
-                    return new ResponseEntity<>("EMPLOYEE", HttpStatus.OK);
-                }  
             }
-            return new ResponseEntity<>("User has no valid role", HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "User has no valid role"));
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid username or password"));
         }
     }
 }
