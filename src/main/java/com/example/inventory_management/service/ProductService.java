@@ -179,7 +179,11 @@ public class ProductService {
     }
 
     public List<Product> getLowStockAlert(Role role) {
-        return productRepository.findAllByAddedy(role);
-
+        List<Product> products = productRepository.findAllByAddedy(role);
+        List<Product> finalList = new ArrayList<>();
+        for(Product it : products) {
+            finalList.add(it);
+        }
+        return finalList;
     }
 }
