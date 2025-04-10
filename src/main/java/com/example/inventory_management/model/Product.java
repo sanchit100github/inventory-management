@@ -28,5 +28,6 @@ public class Product {
     private int reorderLevel;  // Minimum stock level to trigger reordering
     @DBRef
     private List<Batch> batches = new ArrayList<>();
+    @DBRef(lazy = true)
     private Role addedby;
 }

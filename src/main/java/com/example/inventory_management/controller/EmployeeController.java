@@ -187,4 +187,18 @@ public class EmployeeController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
+    @PostMapping("/getlowstockalert")
+    public ResponseEntity<?> getLowStockAlert() {
+        Optional<User> user = getUser();
+        if(user.isPresent()) {
+            if(user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
+                List<Product> products = productService.getLowStockAlert(user.get().getAssigned());
+                return new ResponseEntity<>(products,HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
 }

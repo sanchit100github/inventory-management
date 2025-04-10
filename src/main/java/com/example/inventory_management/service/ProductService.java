@@ -1,6 +1,7 @@
 package com.example.inventory_management.service;
 
 import com.example.inventory_management.model.Product;
+import com.example.inventory_management.model.Role;
 import com.example.inventory_management.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -173,6 +174,15 @@ public class ProductService {
             if(it.getTimestamp().getMonthValue() == month && it.getTimestamp().getYear() == year) {
                 finalList.add(it);
             }
+        }
+        return finalList;
+    }
+
+    public List<Product> getLowStockAlert(Role role) {
+        List<Product> products = productRepository.findAllByAddedy(role);
+        List<Product> finalList = new ArrayList<>();
+        for(Product it : products) {
+            finalList.add(it);
         }
         return finalList;
     }
