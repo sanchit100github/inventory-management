@@ -1,6 +1,7 @@
 package com.example.inventory_management.service;
 
 import com.example.inventory_management.model.Product;
+import com.example.inventory_management.model.Role;
 import com.example.inventory_management.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -175,5 +176,10 @@ public class ProductService {
             }
         }
         return finalList;
+    }
+
+    public List<Product> getLowStockAlert(Role role) {
+        return productRepository.findAllByAddedy(role);
+
     }
 }

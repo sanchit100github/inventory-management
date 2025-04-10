@@ -1,6 +1,7 @@
 package com.example.inventory_management.repository;
 
 import com.example.inventory_management.model.Product;
+import com.example.inventory_management.model.Role;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,5 +19,7 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     List<Product> findAllByMainCategoryAndActive(String role);
 
     List<Product> findAllByMainCategoryAndActiveFalse(String role);
+
+    List<Product> findAllByAddedy(Role role);
 
 }
