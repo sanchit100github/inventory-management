@@ -68,7 +68,7 @@ public class AdminController {
     }
 
     @GetMapping("/testadmin")
-    public ResponseEntity<?>  testAdmin() {
+    public ResponseEntity<?> testAdmin() {
         return new ResponseEntity<>("Test is successful", HttpStatus.OK);
     }
 
@@ -79,15 +79,14 @@ public class AdminController {
         return user;
     }
 
-    @GetMapping("/getmanagerroles") 
+    @GetMapping("/getmanagerroles")
     public ResponseEntity<?> getRoles() {
         Optional<User> user = getUser();
-        if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("ADMIN")) {
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().equals("ADMIN")) {
                 List<Role> roles = userService.getReqRoles(user.get());
                 return new ResponseEntity<>(roles, HttpStatus.OK);
-            }
-            else {
+            } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }
         }
@@ -97,41 +96,40 @@ public class AdminController {
     @GetMapping("/adminprofile")
     public ResponseEntity<?> getProfile() {
         Optional<User> user = getUser();
-        if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("ADMIN")) {
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().equals("ADMIN")) {
                 List<Role> roles = userService.getReqRoles(user.get());
                 return new ResponseEntity<>(roles, HttpStatus.OK);
-            }
-            else {
+            } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }
         }
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @PostMapping("/addcategories") 
+    @PostMapping("/addcategories")
     public ResponseEntity<?> addCategories(@RequestBody Role role) {
         Optional<User> user = getUser();
-        if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("ADMIN")) {
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().equals("ADMIN")) {
                 try {
-                    if(roleRepository.findByName("MANAGER_"+role.getName()).isPresent()) {
+                    if (roleRepository.findByName("MANAGER_" + role.getName()).isPresent()) {
                         return new ResponseEntity<>("Category already exists", HttpStatus.CONFLICT);
-                    }
-                    else {
+                    } else {
                         Role role1 = new Role();
                         role1.setAddedby(user.get().getAssigned());
-                        role1.setName("MANAGER_"+role.getName());
+                        role1.setName("MANAGER_" + role.getName());
                         roleRepository.save(role1);
                         user.get().getAssigned().getOwned().add(role1);
                         roleRepository.save(user.get().getAssigned());
-                        AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added category " + role.getName(), List.of(user.get().getAssigned().getAddedby()));
+                        AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added category " + role.getName(),
+                                List.of(user.get().getAssigned().getAddedby()));
                         auditLogRepository.save(log);
                         return new ResponseEntity<>("Category is added", HttpStatus.OK);
                     }
                 } catch (Exception e) {
                     System.out.println(e);
-                    if(e instanceof NullPointerException) {
+                    if (e instanceof NullPointerException) {
                         return new ResponseEntity<>("Category is added", HttpStatus.OK);
                     }
                     return new ResponseEntity<>("category is not added", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -146,14 +144,15 @@ public class AdminController {
     @PostMapping("/addmanager")
     public ResponseEntity<?> addManager(@RequestBody User user1) {
         Optional<User> user = getUser();
-        if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("ADMIN")) {
-                if(userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().equals("ADMIN")) {
+                if (userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
                     return new ResponseEntity<>("Manager with this email already exists", HttpStatus.CONFLICT);
                 }
                 boolean test = userService.saveNewUser(user1);
-                if(test) {
-                    AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added manager " + user1.getEmail(), List.of(user.get().getAssigned().getAddedby()));
+                if (test) {
+                    AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added manager " + user1.getEmail(),
+                            List.of(user.get().getAssigned().getAddedby()));
                     auditLogService.saveAudit(log);
                     return new ResponseEntity<>("Manager has been added", HttpStatus.OK);
                 } else {
@@ -169,14 +168,15 @@ public class AdminController {
     @PutMapping("/updatemanager")
     public ResponseEntity<?> updateManager(@RequestBody User user1) {
         Optional<User> user = getUser();
-        if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("ADMIN")) {
-                if(!userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().equals("ADMIN")) {
+                if (!userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
                     return new ResponseEntity<>("Manager with this email does not exist", HttpStatus.NOT_FOUND);
                 }
                 boolean test = userService.updateUser(user1);
-                if(test) {
-                    AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated manager " + user1.getEmail(), List.of(user.get().getAssigned().getAddedby()));
+                if (test) {
+                    AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated manager " + user1.getEmail(),
+                            List.of(user.get().getAssigned().getAddedby()));
                     auditLogRepository.save(log);
                     return new ResponseEntity<>("Manager has been updated", HttpStatus.OK);
                 } else {
@@ -192,10 +192,10 @@ public class AdminController {
     @GetMapping("/getmanager")
     public ResponseEntity<?> findManager(@RequestParam String email) {
         Optional<User> user = getUser();
-        if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("ADMIN")) {
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().equals("ADMIN")) {
                 Optional<User> user1 = userService.findUser(email);
-                if(user1.isPresent()) {
+                if (user1.isPresent()) {
                     return new ResponseEntity<>(user1, HttpStatus.OK);
                 } else {
                     return new ResponseEntity<>("Manager with this email does not exist", HttpStatus.NOT_FOUND);
@@ -211,10 +211,10 @@ public class AdminController {
     public ResponseEntity<?> findAllManagers() {
         Optional<User> user = getUser();
         List<User> userList;
-        if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("ADMIN")) {
+        if (user.isPresent()) {
+            if (user.get().getAssigned().getName().equals("ADMIN")) {
                 userList = userService.getAllByActive(true);
-                if(userList.isEmpty()) {
+                if (userList.isEmpty()) {
                     return new ResponseEntity<>("No manager found", HttpStatus.NOT_FOUND);
                 }
                 return new ResponseEntity<>(userList, HttpStatus.OK);
@@ -235,8 +235,10 @@ public class AdminController {
                     User managerToUpdate = manager.get();
                     managerToUpdate.setActive(false);
                     userRepository.save(managerToUpdate);
-                    
-                    AuditLog log = new AuditLog(user.get().getEmail(), "DEACTIVATE", "Deactivated manager " + managerToUpdate.getEmail(), List.of(user.get().getAssigned().getAddedby()));
+
+                    AuditLog log = new AuditLog(user.get().getEmail(), "DEACTIVATE",
+                            "Deactivated manager " + managerToUpdate.getEmail(),
+                            List.of(user.get().getAssigned().getAddedby()));
                     auditLogRepository.save(log);
 
                     return new ResponseEntity<>("Manager deactivated", HttpStatus.OK);
@@ -259,11 +261,11 @@ public class AdminController {
                     try {
                         supplier.setAdded(LocalDateTime.now());
                         supplierService.saveSupplier(supplier);
-                        AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added supplier " + supplier.getName(), List.of(user.get().getAssigned().getAddedby()));
+                        AuditLog log = new AuditLog(user.get().getEmail(), "ADD",
+                                "Added supplier " + supplier.getName(), List.of(user.get().getAssigned().getAddedby()));
                         auditLogService.saveAudit(log);
                         return new ResponseEntity<>("Supplier added successfully", HttpStatus.OK);
-                    } 
-                    catch(Exception e) {
+                    } catch (Exception e) {
                         return new ResponseEntity<>("Supplier addition failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
@@ -282,16 +284,18 @@ public class AdminController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
                 if (supplierService.getSupplierById(supplier.getSupplierId()).isPresent()) {
-                    if(supplierService.getSupplierByName(supplier.getName()).get().getSupplierId().equals(supplier.getSupplierId())) {
+                    if (supplierService.getSupplierByName(supplier.getName()).get().getSupplierId()
+                            .equals(supplier.getSupplierId())) {
                         return new ResponseEntity<>("Customer with this name already exists", HttpStatus.CONFLICT);
                     }
                     try {
                         supplierService.updateSupplier(supplier);
-                        AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated supplier " + supplier.getName(), List.of(user.get().getAssigned().getAddedby()));
+                        AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE",
+                                "Updated supplier " + supplier.getName(),
+                                List.of(user.get().getAssigned().getAddedby()));
                         auditLogService.saveAudit(log);
                         return new ResponseEntity<>("Supplier updated successfully", HttpStatus.OK);
-                    } 
-                    catch(Exception e) {
+                    } catch (Exception e) {
                         return new ResponseEntity<>("Supplier updation failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
@@ -313,11 +317,12 @@ public class AdminController {
                 if (supplierService.getSupplierById(id).isPresent()) {
                     try {
                         supplierService.deleteSupplier(id);
-                        AuditLog log = new AuditLog(user.get().getEmail(), "DEACTIVATED", "Deactivated supplier " + supplierService.getSupplierById(id).get().getName(), List.of(user.get().getAssigned().getAddedby()));
+                        AuditLog log = new AuditLog(user.get().getEmail(), "DEACTIVATED",
+                                "Deactivated supplier " + supplierService.getSupplierById(id).get().getName(),
+                                List.of(user.get().getAssigned().getAddedby()));
                         auditLogService.saveAudit(log);
                         return new ResponseEntity<>("Supplier deactivated successfully", HttpStatus.OK);
-                    } 
-                    catch(Exception e) {
+                    } catch (Exception e) {
                         return new ResponseEntity<>("Supplier deactivation failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
@@ -370,11 +375,11 @@ public class AdminController {
                     try {
                         customer.setAdded(LocalDateTime.now());
                         customerService.saveCustomer(customer);
-                        AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added customer " + customer.getName(), List.of(user.get().getAssigned().getAddedby()));
+                        AuditLog log = new AuditLog(user.get().getEmail(), "ADD",
+                                "Added customer " + customer.getName(), List.of(user.get().getAssigned().getAddedby()));
                         auditLogService.saveAudit(log);
                         return new ResponseEntity<>("Customer added successfully", HttpStatus.OK);
-                    } 
-                    catch(Exception e) {
+                    } catch (Exception e) {
                         return new ResponseEntity<>("Customer addition failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
@@ -393,16 +398,18 @@ public class AdminController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
                 if (customerService.getCustomerById(customer.getCustomerId()).isPresent()) {
-                    if(customerService.getCustomerByName(customer.getName()).get().getCustomerId().equals(customer.getCustomerId())) {
+                    if (customerService.getCustomerByName(customer.getName()).get().getCustomerId()
+                            .equals(customer.getCustomerId())) {
                         return new ResponseEntity<>("Customer with this name already exists", HttpStatus.CONFLICT);
                     }
                     try {
                         customerService.updateCustomer(customer);
-                        AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated customer " + customer.getName(), List.of(user.get().getAssigned().getAddedby()));
+                        AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE",
+                                "Updated customer " + customer.getName(),
+                                List.of(user.get().getAssigned().getAddedby()));
                         auditLogService.saveAudit(log);
                         return new ResponseEntity<>("Customer updated successfully", HttpStatus.OK);
-                    } 
-                    catch(Exception e) {
+                    } catch (Exception e) {
                         return new ResponseEntity<>("Customer updation failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
@@ -424,11 +431,12 @@ public class AdminController {
                 if (customerService.getCustomerById(id).isPresent()) {
                     try {
                         customerService.deleteCustomer(id);
-                        AuditLog log = new AuditLog(user.get().getEmail(), "DEACTIVATED", "Deactivated customer " + customerService.getCustomerById(id).get().getName(), List.of(user.get().getAssigned().getAddedby()));
+                        AuditLog log = new AuditLog(user.get().getEmail(), "DEACTIVATED",
+                                "Deactivated customer " + customerService.getCustomerById(id).get().getName(),
+                                List.of(user.get().getAssigned().getAddedby()));
                         auditLogService.saveAudit(log);
                         return new ResponseEntity<>("Customer deactivated successfully", HttpStatus.OK);
-                    } 
-                    catch(Exception e) {
+                    } catch (Exception e) {
                         return new ResponseEntity<>("Customer deactivation failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } else {
@@ -473,7 +481,8 @@ public class AdminController {
     }
 
     @GetMapping("/generatereport")
-    public ResponseEntity<?> generateAdminReport(@RequestBody Map<String, Integer> requestBody, HttpServletResponse response) throws IOException{
+    public ResponseEntity<?> generateAdminReport(@RequestBody Map<String, Integer> requestBody,
+            HttpServletResponse response) throws IOException {
         Optional<User> user = getUser();
         Integer month = requestBody.get("month");
         Integer year = requestBody.get("year");

@@ -34,20 +34,22 @@ public class SpringSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/user/addnew", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/", "/login", "/user/addnew", "/swagger-ui/**", "/v3/api-docs/**",
+                                "/swagger-ui.html")
+                        .permitAll()
                         .requestMatchers("/test1").authenticated()
                         .anyRequest().permitAll())
-                // .addFilterBefore(roleAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                // .addFilterBefore(roleAuthorizationFilter,
+                // UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(logout -> logout
-                    .logoutUrl("/logout") // optional, defaults to /logout
-                    .logoutSuccessHandler((request, response, authentication) -> {
-                        response.setStatus(HttpServletResponse.SC_OK);
-                    })
-                )
+                        .logoutUrl("/logout") // optional, defaults to /logout
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        }))
                 .build();
     }
 

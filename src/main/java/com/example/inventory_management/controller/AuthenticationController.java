@@ -33,8 +33,8 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    loginRequest.getEmail(), loginRequest.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
@@ -42,24 +42,22 @@ public class AuthenticationController {
             String name = authentication.getName();
             Optional<User> user = userRepository.findByEmailAndActive(name, true);
 
-            if(user.isPresent()) {
+            if (user.isPresent()) {
                 String roleName = user.get().getAssigned().getName();
 
-                if(roleName.equals("ADMIN")) {
+                if (roleName.equals("ADMIN")) {
                     return ResponseEntity.ok(Map.of("role", "ADMIN"));
-                }
-                else if(roleName.startsWith("MANAGER")) {
+                } else if (roleName.startsWith("MANAGER")) {
                     return ResponseEntity.ok(Map.of("role", "MANAGER"));
-                }
-                else if(roleName.startsWith("EMPLOYEE")) {
+                } else if (roleName.startsWith("EMPLOYEE")) {
                     return ResponseEntity.ok(Map.of("role", "EMPLOYEE"));
-                }  
+                }
             }
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                 .body(Map.of("error", "User has no valid role"));
+                    .body(Map.of("error", "User has no valid role"));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(Map.of("error", "Invalid username or password"));
+                    .body(Map.of("error", "Invalid username or password"));
         }
     }
 }
