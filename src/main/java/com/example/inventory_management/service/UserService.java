@@ -70,7 +70,11 @@ public class UserService {
     }
 
     public List<Role> getReqRoles(User user) {
-        return user.getAssigned().getOwned();
+        List<Role> roles = new ArrayList<>();
+        for(Role it : user.getAssigned().getOwned()) {
+            roles.add(roleRepository.findByName(it.getName()).get());
+        }
+        return roles;
     }
 
     public List<String> getCategories(User user) {

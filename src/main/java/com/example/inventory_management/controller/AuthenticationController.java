@@ -39,18 +39,18 @@ public class AuthenticationController {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String email = authentication.getName();
-            Optional<User> user = userRepository.findByEmailAndActive(email, true);
+            String name = authentication.getName();
+            Optional<User> user = userRepository.findByEmailAndActive(name, true);
 
             if (user.isPresent()) {
                 String roleName = user.get().getAssigned().getName();
 
                 if (roleName.equals("ADMIN")) {
-                    return ResponseEntity.ok(Map.of("email", email, "role", "ADMIN"));
+                    return ResponseEntity.ok(Map.of("role", "ADMIN"));
                 } else if (roleName.startsWith("MANAGER")) {
-                    return ResponseEntity.ok(Map.of("email", email, "role", "MANAGER"));
+                    return ResponseEntity.ok(Map.of("role", "MANAGER"));
                 } else if (roleName.startsWith("EMPLOYEE")) {
-                    return ResponseEntity.ok(Map.of("email", email, "role", "EMPLOYEE"));
+                    return ResponseEntity.ok(Map.of("role", "EMPLOYEE"));
                 }
             }
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
