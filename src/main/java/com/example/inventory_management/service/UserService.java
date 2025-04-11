@@ -29,9 +29,8 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
             return true;
-        } 
-        catch (Exception e) {
-            e.printStackTrace();  
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -40,14 +39,13 @@ public class UserService {
         try {
             Optional<User> user1 = userRepository.findById(user.getId());
             user.setAssigned(user.getAssigned());
-            if(!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
+            if (!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             userRepository.save(user);
             return true;
-        } 
-        catch (Exception e) {
-            e.printStackTrace();  
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -63,7 +61,6 @@ public class UserService {
     public List<User> getAllByActive(boolean active) {
         return userRepository.findAllByActive(active);
     }
-
 
     public void deleteUser(String email) {
         userRepository.deleteByEmailAndActive(email, true);
@@ -84,5 +81,5 @@ public class UserService {
         categories.add(user.getAssigned().getName().replaceFirst("^EMPLOYEE_", ""));
         return categories;
     }
-    
+
 }

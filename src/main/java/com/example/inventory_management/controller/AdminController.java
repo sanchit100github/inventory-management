@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.example.inventory_management.model.AuditLog;
 import com.example.inventory_management.model.Customer;
@@ -34,8 +35,9 @@ import com.example.inventory_management.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
-
+@CrossOrigin(origins = { "http://localhost:5173",
+        "http://127.0.0.1:5173" }, allowedHeaders = "*", allowCredentials = "true", methods = { RequestMethod.GET,
+                RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS })
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
@@ -84,13 +86,49 @@ public class AdminController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().equals("ADMIN")) {
-                List<Role> roles = userService.getReqRoles(user.get());
-                return new ResponseEntity<>(roles, HttpStatus.OK);
+                try {
+                    // Get fresh admin role data
+                    Role adminRole = roleRepository.findById(user.get().getAssigned().getId())
+                            .orElseThrow(() -> new RuntimeException("Admin role not found"));
+                    System.out.println("Admin Role ID: " + adminRole.getId());
+                    System.out.println("Admin Owned Roles: "
+                            + (adminRole.getOwned() != null ? adminRole.getOwned().size() : "null"));
+
+                    // Get all roles that start with MANAGER_
+                    List<Role> allRoles = roleRepository.findAll();
+                    System.out.println("Total roles in database: " + allRoles.size());
+
+                    List<Role> managerRoles = allRoles.stream()
+                            .filter(role -> role.getName().startsWith("MANAGER_"))
+                            .toList();
+                    System.out.println("Filtered manager roles: " + managerRoles.size());
+                    System.out.println("Manager roles: " + managerRoles.stream()
+                            .map(Role::getName)
+                            .toList());
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("status", "success");
+                    response.put("data", managerRoles);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Map<String, String> response = new HashMap<>();
+                    response.put("status", "error");
+                    response.put("message", "Error fetching roles: " + e.getMessage());
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             } else {
-                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+                Map<String, String> response = new HashMap<>();
+                response.put("status", "error");
+                response.put("message", "Access denied");
+                return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
             }
         }
-        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "error");
+        response.put("message", "Access denied");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     @GetMapping("/adminprofile")
@@ -126,17 +164,23 @@ public class AdminController {
                         return new ResponseEntity<>("Category is added", HttpStatus.OK);
                     }
                 } catch (Exception e) {
-                    System.out.println(e);
-                    if (e instanceof NullPointerException) {
-                        return new ResponseEntity<>("Category is added", HttpStatus.OK);
-                    }
-                    return new ResponseEntity<>("category is not added", HttpStatus.INTERNAL_SERVER_ERROR);
+                    e.printStackTrace();
+                    Map<String, String> response = new HashMap<>();
+                    response.put("status", "error");
+                    response.put("message", "Failed to add category: " + e.getMessage());
+                    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             } else {
-                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+                Map<String, String> response = new HashMap<>();
+                response.put("status", "error");
+                response.put("message", "Access denied");
+                return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
             }
         }
-        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "error");
+        response.put("message", "Access denied");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     @PostMapping("/addmanager")

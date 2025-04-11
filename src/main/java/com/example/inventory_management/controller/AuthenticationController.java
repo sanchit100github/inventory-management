@@ -44,13 +44,19 @@ public class AuthenticationController {
 
             if (user.isPresent()) {
                 String roleName = user.get().getAssigned().getName();
+                String userEmail = user.get().getEmail();
+                Map<String, String> response = new HashMap<>();
+                response.put("email", userEmail);
 
                 if (roleName.equals("ADMIN")) {
-                    return ResponseEntity.ok(Map.of("role", "ADMIN"));
+                    response.put("role", "ADMIN");
+                    return ResponseEntity.ok(response);
                 } else if (roleName.startsWith("MANAGER")) {
-                    return ResponseEntity.ok(Map.of("role", "MANAGER"));
+                    response.put("role", "MANAGER");
+                    return ResponseEntity.ok(response);
                 } else if (roleName.startsWith("EMPLOYEE")) {
-                    return ResponseEntity.ok(Map.of("role", "EMPLOYEE"));
+                    response.put("role", "EMPLOYEE");
+                    return ResponseEntity.ok(response);
                 }
             }
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
