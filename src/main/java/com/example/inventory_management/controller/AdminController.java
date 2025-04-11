@@ -120,8 +120,6 @@ public class AdminController {
                         role1.setAddedby(user.get().getAssigned());
                         role1.setName("MANAGER_" + role.getName());
                         roleRepository.save(role1);
-                        user.get().getAssigned().getOwned().add(role1);
-                        roleRepository.save(user.get().getAssigned());
                         AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added category " + role.getName(),
                                 List.of(user.get().getAssigned().getAddedby()));
                         auditLogRepository.save(log);

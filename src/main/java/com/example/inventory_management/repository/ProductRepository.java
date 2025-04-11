@@ -20,6 +20,6 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     List<Product> findAllByMainCategoryAndActiveFalse(String role);
 
-    List<Product> findAllByAddedy(Role role);
+    List<Product> findAllByAddedby(Role role);
 
 }

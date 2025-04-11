@@ -118,8 +118,6 @@ public class ManagerController {
                     else {
                         role.setAddedby(user.get().getAssigned());
                         roleRepository.save(role);
-                        user.get().getAssigned().getOwned().add(role);
-                        userRepository.save(user.get());
                         AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added category" + role.getName(), List.of(user.get().getAssigned().getAddedby()));
                         auditLogRepository.save(log);
                         return new ResponseEntity<>("Category is added", HttpStatus.OK);

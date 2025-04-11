@@ -70,9 +70,11 @@ public class UserService {
     }
 
     public List<Role> getReqRoles(User user) {
-        List<Role> roles = new ArrayList<>();
-        for(Role it : user.getAssigned().getOwned()) {
-            roles.add(roleRepository.findByName(it.getName()).get());
+        List<Role> roles = roleRepository.findByNameNot("ADMIN");
+        for(Role it : roles) {
+            if(!it.getAddedby().getName().equals(user.getAssigned().getName())) {
+                roles.remove(it);
+            }
         }
         return roles;
     }
