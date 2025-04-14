@@ -42,8 +42,10 @@ public class UserService {
             User finaluser = user1.get();
             finaluser.setAssigned(user.getAssigned());
             finaluser.setContact(user.getContact());
+            return userRepository.save(finaluser);
         }
-        return userRepository.save(user);
+        return null;
+        
     }
 
     public List<User> findByAssigned(Role assigned) {
