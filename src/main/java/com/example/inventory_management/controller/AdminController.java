@@ -335,7 +335,7 @@ public class AdminController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping("/getsupplierbyname")
+    @PostMapping("/getsupplierbyname")
     public ResponseEntity<?> getSupplierByName(@RequestBody Map<String, String> requestBody) {
         String name = requestBody.get("name");
         Optional<User> user = getUser();
