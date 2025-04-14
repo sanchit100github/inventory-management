@@ -24,8 +24,8 @@ public class ProductService {
     private MongoTemplate mongoTemplate;  // Injecting MongoTemplate
 
     // Get all products
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<Product> getAllProducts(User user) {
+        return productRepository.findAllByMainCategoryAndActive(user.getAssigned().getName().replace("EMPLOYEE_", ""));
     }
 
     // Get product by ID
