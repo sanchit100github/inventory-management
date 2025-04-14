@@ -25,10 +25,12 @@ import com.example.inventory_management.service.UserService;
 import com.example.inventory_management.service.RefillService;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 
-@RestController("/employee")
+@RestController
+@RequestMapping("/employee")
 public class EmployeeController {
 
     @Autowired
@@ -77,7 +79,7 @@ public class EmployeeController {
         if(user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
                 product.setAddedby(user.get().getAssigned());
-                Product test = productService.saveProduct(product);
+                Product test = productService.saveProduct(product, user.get());
                 if(test != null) {
                     AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added product " + product.getName(), List.of(user.get().getAssigned().getAddedby()));
                     auditLogService.saveAudit(log);
@@ -120,7 +122,7 @@ public class EmployeeController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping("/getproduct")
+    @PostMapping("/getproduct")
     public ResponseEntity<?> getProduct(@RequestBody Map<String, String> requestBody) {
         String id = requestBody.get("id");
         Optional<User> user = getUser();
@@ -165,7 +167,7 @@ public class EmployeeController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);  
     }
 
-    @PostMapping("/addRefillRequest")
+    @PostMapping("/addrefillrequest")
     public ResponseEntity<?> addRefillRequest(@RequestBody Refill refill) {
         Optional<User> user = getUser();
         if(user.isPresent()) {
@@ -187,7 +189,7 @@ public class EmployeeController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @PostMapping("/getlowstockalert")
+    @GetMapping("/getlowstockalert")
     public ResponseEntity<?> getLowStockAlert() {
         Optional<User> user = getUser();
         if(user.isPresent()) {

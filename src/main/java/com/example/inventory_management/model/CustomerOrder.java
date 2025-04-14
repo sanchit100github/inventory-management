@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document(collection = "orders")
+@Document(collection = "Customer_orders")
 public class CustomerOrder {
     @Id
     private String orderId;     // Unique identifier for each order

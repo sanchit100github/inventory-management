@@ -72,6 +72,11 @@ public class SupplierOrderService {
                     Batch batch1=batch.get();
                     batch1.setQuantity(batch.get().getQuantity()+it.getQuantity());
                     batchService.saveBatch(batch1);
+                    Optional<Product> product = productService.getProductById(it.getProductId());
+                    if(product.isPresent()) {
+                        product.get().setStockLevel(product.get().getStockLevel()+it.getQuantity());
+                        productService.save(product.get());
+                    }
                 }
                 else {
                     Batch newBatch = new Batch();
@@ -85,6 +90,8 @@ public class SupplierOrderService {
                     Optional<Product> product = productService.getProductById(it.getProductId());
                     if(product.isPresent()) {
                         product.get().getBatches().add(newBatch);
+                        product.get().setStockLevel(product.get().getStockLevel()+it.getQuantity());
+                        productService.save(product.get());
                     }
                     else {
                         return null;

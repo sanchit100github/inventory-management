@@ -16,7 +16,7 @@ public class SupplierService {
 
     // Get all suppliers
     public List<Supplier> getAllSuppliers() {
-        return supplierRepository.findAllByActive();
+        return supplierRepository.findAllByActive(true);
     }
 
     // Get supplier by ID
@@ -77,8 +77,8 @@ public class SupplierService {
         return supplierRepository.findByAddressContainingIgnoreCase(address);
     }
 
-    public List<Supplier> findSuppliersByActive() {
-        return supplierRepository.findAllByActive();
+    public List<Supplier> findSuppliersByActive(boolean active) {
+        return supplierRepository.findAllByActive(active);
     }
 
     public Optional<Supplier> getSupplierByName(String name) {

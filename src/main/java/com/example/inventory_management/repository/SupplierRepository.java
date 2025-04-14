@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface SupplierRepository extends MongoRepository<Supplier, String> {
     
     List<Supplier> findByAddressContainingIgnoreCase(String address);
-    List<Supplier> findAllByActive();
+    List<Supplier> findAllByActive(boolean active);
     Optional<Supplier> findByName(String name);
     List<Supplier> findByActive(boolean b);
 }

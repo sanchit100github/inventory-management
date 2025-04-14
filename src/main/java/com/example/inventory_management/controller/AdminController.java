@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.inventory_management.model.AuditLog;
@@ -187,8 +186,9 @@ public class AdminController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping("/getmanager")
-    public ResponseEntity<?> findManager(@RequestParam String email) {
+    @PostMapping("/getmanager")
+    public ResponseEntity<?> findManager(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().equals("ADMIN")) {
@@ -205,13 +205,13 @@ public class AdminController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping("/c")
+    @GetMapping("/getallmanagers")
     public ResponseEntity<?> findAllManagers() {
         Optional<User> user = getUser();
         List<User> userList;
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().equals("ADMIN")) {
-                userList = userService.getAllByActive(true);
+                userList = userService.getAllManagers();
                 if (userList.isEmpty()) {
                     return new ResponseEntity<>("No manager found", HttpStatus.NOT_FOUND);
                 }
@@ -224,7 +224,8 @@ public class AdminController {
     }
 
     @PutMapping("/deletemanager")
-    public ResponseEntity<?> deleteManager(@RequestParam String email) {
+    public ResponseEntity<?> deleteManager(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().equals("ADMIN")) {
@@ -356,7 +357,8 @@ public class AdminController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
-                return new ResponseEntity<>(supplierService.findSuppliersByActive(), HttpStatus.OK);
+                List<Supplier> suppliers = supplierService.findSuppliersByActive(true);
+                return new ResponseEntity<>(suppliers, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }

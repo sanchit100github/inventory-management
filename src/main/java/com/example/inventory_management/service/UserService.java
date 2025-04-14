@@ -1,6 +1,7 @@
 package com.example.inventory_management.service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +56,7 @@ public class UserService {
     }
 
     public Optional<User> findUser(String email) {
-        return userRepository.findByEmailAndActive(email, true);
+        return userRepository.findByEmail(email);
     }
 
     public List<User> getAllByActive(boolean active) {
@@ -80,6 +81,30 @@ public class UserService {
         List<String> categories = new ArrayList<>();
         categories.add(user.getAssigned().getName().replaceFirst("^EMPLOYEE_", ""));
         return categories;
+    }
+
+    public List<User> getAllManagers() {
+        List<User> managers = userRepository.findAllByActive(true);
+        Iterator<User> iterator = managers.iterator();
+        while (iterator.hasNext()) {
+            User it = iterator.next();
+            if (!it.getAssigned().getName().startsWith("MANAGER")) {
+                iterator.remove(); 
+            }
+        }
+        return managers;
+    }
+
+    public List<User> getAllEmployees(User user) {
+        List<User> employees = userRepository.findAllByActive(true);
+        Iterator<User> iterator = employees.iterator();
+        while (iterator.hasNext()) {
+            User it = iterator.next();
+            if (!it.getAssigned().getName().startsWith("EMPLOYEE") || !it.getAssigned().getAddedby().equals(user.getAssigned())) {
+                iterator.remove(); 
+            }
+        }
+        return employees;
     }
 
 }

@@ -14,7 +14,7 @@ public class TempBatch {
     private String tempId;
     private String batchId;      
     private String productId;
-    private String OrderId;
+    private String orderId;
     private double price;
     private double cost;
     private int quantity;

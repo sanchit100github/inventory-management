@@ -39,6 +39,7 @@ public class CustomerOrderService {
     public CustomerOrder placeOrder(CustomerOrder order) {
         order.setTimestamp(LocalDateTime.now());
         order.setStatus("Pending");  
+        double total=0; 
         double profit=0;
         List<Batch> batches;
         Map<String, Integer> mapBatches = new HashMap<String, Integer>();
@@ -49,20 +50,24 @@ public class CustomerOrderService {
             batches.sort(Comparator.comparing(Batch::getCreated));
             for(Batch batch : batches) {
                 if(count >= batch.getQuantity()) {
+                    count -= batch.getQuantity();
                     mapBatches.put(batch.getBatchId(), batch.getQuantity());
                 }
                 else {
                     mapBatches.put(batch.getBatchId(), count);
+                    count=0;
                 }
             }
             if(count > 0) {
                 return null;
             }
-            mapProducts.put(it, count);
+            mapProducts.put(it, it.getQuantity());
         }
         for (Map.Entry<String, Integer> entry : mapBatches.entrySet()) {
-            profit = batchService.getBatchById(entry.getKey()).get().getPrice() - batchService.getBatchById(entry.getKey()).get().getCost();
+            profit += batchService.getBatchById(entry.getKey()).get().getPrice() - batchService.getBatchById(entry.getKey()).get().getCost();
+            total += batchService.getBatchById(entry.getKey()).get().getPrice();
         }
+        order.setTotalAmount(total);
         order.setProfitOnProducts(profit);
         inventoryService.updateInventory(mapBatches, mapProducts, order.getOrderId());
         return customerOrderRepository.save(order);

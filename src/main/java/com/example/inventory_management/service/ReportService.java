@@ -63,7 +63,7 @@ public class ReportService {
 
     public void generateAdminReport(int month, int year, HttpServletResponse response) throws IOException {
 
-        List<Supplier> suppliers = supplierRepository.findAllByActive();
+        List<Supplier> suppliers = supplierRepository.findAllByActive(true);
         List<String> supplierNames = new ArrayList<>();
         for(Supplier it : suppliers) {
             supplierNames.add(it.getName());

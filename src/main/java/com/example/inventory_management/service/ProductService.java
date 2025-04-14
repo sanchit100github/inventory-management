@@ -2,6 +2,7 @@ package com.example.inventory_management.service;
 
 import com.example.inventory_management.model.Product;
 import com.example.inventory_management.model.Role;
+import com.example.inventory_management.model.User;
 import com.example.inventory_management.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -33,7 +34,9 @@ public class ProductService {
     }
 
     // Save new product
-    public Product saveProduct(Product product) {
+    public Product saveProduct(Product product, User user) {
+        product.setMainCategory(user.getAssigned().getName().replaceFirst("EMPLOYEE_", ""));
+        product.setActive(true);
         product.setTimestamp(LocalDateTime.now());
         return productRepository.save(product);  // Save the product
     }

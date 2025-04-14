@@ -42,6 +42,7 @@ public class RefillService {
             return null;
         }
         refill.setTimestamp(LocalDateTime.now());
+        refill.setStatus("PENDING");
         return refillRepository.save(refill);  // Save the product
     }
 

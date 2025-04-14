@@ -1,6 +1,7 @@
 package com.example.inventory_management.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -14,7 +15,7 @@ public class SupplierOrder {
     @Id
     private String orderId;     // Unique identifier for each order
     private String supplierId;  // Reference to the customer who placed the order
-    private List<OrderProduct> products;  // List of products ordered
+    private List<OrderProduct> products = new ArrayList<>();  // List of products ordered
     private double totalAmount;  // Total price of all products in the order
     private Role orderedby;
     private LocalDateTime timestamp;

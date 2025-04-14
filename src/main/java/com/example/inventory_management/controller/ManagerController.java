@@ -110,13 +110,14 @@ public class ManagerController {
     public ResponseEntity<?> addCategories(@RequestBody Role role) {
         Optional<User> user = getUser();
         if(user.isPresent()) {
-            if(user.get().getAssigned().getName().equals("MANAGER")) {
+            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
                 try {
                     if(roleRepository.findByName("EMPLOYEE_"+role.getName()).isPresent()) {
                         return new ResponseEntity<>("Category already exists", HttpStatus.CONFLICT);
                     }
                     else {
                         role.setAddedby(user.get().getAssigned());
+                        role.setName("EMPLOYEE_"+role.getName());
                         roleRepository.save(role);
                         AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added category" + role.getName(), List.of(user.get().getAssigned().getAddedby()));
                         auditLogRepository.save(log);
@@ -178,8 +179,9 @@ public class ManagerController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping("/getemployee")
-    public ResponseEntity<?> findEmployee(@RequestParam String email) {
+    @PostMapping("/getemployee")
+    public ResponseEntity<?> findEmployee(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
         Optional<User> user = getUser();
         if(user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("MANAGER")) {
@@ -202,7 +204,7 @@ public class ManagerController {
         List<User> userList;
         if(user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("MANAGER")) {
-                userList = userService.getAllByActive(true);
+                userList = userService.getAllEmployees(user.get());
                 if(userList.isEmpty()) {
                     return new ResponseEntity<>("No employee found", HttpStatus.NOT_FOUND);
                 }
@@ -252,7 +254,7 @@ public class ManagerController {
                     }
                     AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added order " + order.getSupplierId(), List.of(user.get().getAssigned().getAddedby()));
                     auditLogService.saveAudit(log);
-                    return new ResponseEntity<>("Order status added", HttpStatus.OK);
+                    return new ResponseEntity<>("Order added", HttpStatus.OK);
                 } catch (Exception e) {
                     return new ResponseEntity<>("Order was not added", HttpStatus.INTERNAL_SERVER_ERROR);
                 }
@@ -305,7 +307,7 @@ public class ManagerController {
                     }
                     AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added order " + order.getCustomerId(), List.of(user.get().getAssigned().getAddedby()));
                     auditLogService.saveAudit(log);
-                    return new ResponseEntity<>("Order status added", HttpStatus.OK);
+                    return new ResponseEntity<>("Order added", HttpStatus.OK);
                 } catch (Exception e) {
                     return new ResponseEntity<>("Order was not added", HttpStatus.INTERNAL_SERVER_ERROR);
                 }
@@ -323,16 +325,32 @@ public class ManagerController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("MANAGER")) {
-                try {
-                    CustomerOrder present = customerOrderService.updateOrderStatus(id, status);
-                    if(present==null) {
-                        return new ResponseEntity<>("Order not found", HttpStatus.NOT_FOUND);
-                    }
-                    AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated order " + supplierOrderService.getOrderById(id) + "status to " + status, List.of(user.get().getAssigned().getAddedby()));
-                    auditLogService.saveAudit(log);
-                    return new ResponseEntity<>("Order status updated", HttpStatus.OK);
-                } catch (Exception e) {
-                    return new ResponseEntity<>("Order status was not updated", HttpStatus.INTERNAL_SERVER_ERROR);
+                CustomerOrder present = customerOrderService.updateOrderStatus(id, status);
+                if(present==null) {
+                    return new ResponseEntity<>("Order not found", HttpStatus.NOT_FOUND);
+                }
+                AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated order " + supplierOrderService.getOrderById(id) + "status to " + status, List.of(user.get().getAssigned().getAddedby()));
+                auditLogService.saveAudit(log);
+                return new ResponseEntity<>("Order status updated", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
+    @PostMapping("/payment/getpayment") 
+    public ResponseEntity<?> getPayment(@RequestBody Map<String, String> requestBody) {
+        String id = requestBody.get("id");
+        Optional<User> user = getUser();
+        if(user.isPresent()) {
+            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+                Optional<Payment> payment = paymentService.getPaymentById(id);
+                if(payment.isPresent()) {
+                    return new ResponseEntity<>(payment, HttpStatus.OK);
+                }
+                else {
+                    return new ResponseEntity<>("No payment is found", HttpStatus.NOT_FOUND);
                 }
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
@@ -387,9 +405,10 @@ public class ManagerController {
         }
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
+    
 
-    @GetMapping ("/refill/getrefills")
-    public ResponseEntity<?> getRefills(@RequestBody Map<String, String> requestBody) {
+    @PostMapping ("/refill/getrefills")
+    public ResponseEntity<?> getRefillsByStatus(@RequestBody Map<String, String> requestBody) {
         String status = requestBody.get("status");
         Optional<User> user = getUser();
         if(user.isPresent()) {
@@ -402,13 +421,13 @@ public class ManagerController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @PostMapping("/refill/updaterefill")
+    @PutMapping("/refill/updaterefill")
     public ResponseEntity<?> updateRefill(@RequestBody Refill refill) {
         Optional<User> user = getUser();
         if(user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("MANAGER")) {
                 if(refillService.updateRefill(refill)!=null) {
-                    return new ResponseEntity<>("Refill is updated", HttpStatus.OK);
+                    return new ResponseEntity<>("Refill is updated", HttpStatus.OK);    
                 }
                 else {
                     return new ResponseEntity<>("Refill is not updated", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -63,7 +63,7 @@ public class InventoryService {
             Product product = product1.get();
             List<User> users = userService.findByAssigned(product.getAddedby());
             product.setStockLevel(product.getStockLevel()-entry.getValue());
-            productService.saveProduct(product);
+            productService.save(product);
             if(product.getStockLevel() <= product.getReorderLevel()) {
                 for(User it : users) {
                     emailService.sendLowStockAlert(product.getName(), product.getStockLevel(), it.getEmail());

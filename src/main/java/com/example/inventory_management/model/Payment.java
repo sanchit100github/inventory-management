@@ -14,8 +14,7 @@ public class Payment {
     private String orderId;             // Reference to the associated order
     private double amount;              // Amount paid
     private String orderType;
-    private String paymentMethod;       // Payment method (e.g., "Credit Card", "PayPal")
     private Role addedby;
-    private String paymentType;       // Payment status (e.g., "Pending", "Completed", "Failed")
+    private String status;       // Payment status (e.g., "Pending", "Completed", "Failed")
     private LocalDateTime paymentDate;         // Date and time of the payment
 }

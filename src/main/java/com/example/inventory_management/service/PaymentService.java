@@ -54,8 +54,7 @@ public class PaymentService {
 
             // Update fields of the existing payment
             updatedPayment.setAmount(payment.getAmount());
-            updatedPayment.setPaymentMethod(payment.getPaymentMethod());
-            updatedPayment.setPaymentType(payment.getPaymentType());
+            updatedPayment.setStatus(payment.getStatus());
 
             // Save and return updated payment
             return paymentRepository.save(updatedPayment);
