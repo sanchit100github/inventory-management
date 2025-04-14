@@ -26,7 +26,6 @@ public class SupplierService {
 
     // Save new supplier
     public Supplier saveSupplier(Supplier supplier) {
-        validateProductTypes(supplier.getProductTypes()); // Validate product types
         return supplierRepository.save(supplier);
     }
 
@@ -39,9 +38,7 @@ public class SupplierService {
             // Update fields (this can be adjusted as needed)
             updatedSupplier.setName(supplier.getName());
             updatedSupplier.setContactEmail(supplier.getContactEmail());
-            updatedSupplier.setContactPhone(supplier.getContactPhone());
             updatedSupplier.setAddress(supplier.getAddress());
-            updatedSupplier.setProductTypes(supplier.getProductTypes()); // Update product types
             
             // Save and return updated supplier
             return supplierRepository.save(updatedSupplier);
@@ -59,18 +56,6 @@ public class SupplierService {
             supplierRepository.save(updatedSupplier);
         }
         
-    }
-
-    // Validate product types
-    private void validateProductTypes(List<String> productTypes) {
-        if (productTypes == null || productTypes.isEmpty()) {
-            throw new IllegalArgumentException("Product types must not be null or empty.");
-        }
-        for (String productType : productTypes) {
-            if (productType == null || productType.trim().isEmpty()) {
-                throw new IllegalArgumentException("Product type must not be null or blank.");
-            }
-        }
     }
 
     public List<Supplier> findSuppliersByAddress(String address) {

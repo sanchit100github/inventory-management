@@ -257,6 +257,7 @@ public class AdminController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
                 if (!supplierService.getSupplierByName(supplier.getName()).isPresent()) {
+                    supplier.setActive(true);
                     supplier.setAdded(LocalDateTime.now());
                     Supplier supplier2 = supplierService.saveSupplier(supplier);
                     if(supplier2!=null) {

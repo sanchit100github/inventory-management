@@ -69,7 +69,7 @@ public class ReportService {
             supplierNames.add(it.getName());
         }
 
-        List<Customer> customers = customerRepository.findAllByActive();
+        List<Customer> customers = customerRepository.findAllByActive(true);
         List<String> customerNames = new ArrayList<>();
         for(Customer it : customers) {
             customerNames.add(it.getName());
