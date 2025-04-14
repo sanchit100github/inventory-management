@@ -167,7 +167,7 @@ public class AdminController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().equals("ADMIN")) {
-                if (!userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
+                if (userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
                     return new ResponseEntity<>("Manager with this email does not exist", HttpStatus.NOT_FOUND);
                 }
                 boolean test = userService.updateUser(user1);
