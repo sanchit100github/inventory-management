@@ -36,19 +36,13 @@ public class UserService {
         }
     }
 
-    public boolean updateUser(User user) {
-        try {
-            Optional<User> user1 = userRepository.findById(user.getId());
-            user.setAssigned(user.getAssigned());
-            if (!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-            userRepository.save(user);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    public User updateUser(User user) {
+        Optional<User> user1 = userRepository.findById(user.getId());
+        user.setAssigned(user.getAssigned());
+        if (!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+        return userRepository.save(user);
     }
 
     public List<User> findByAssigned(Role assigned) {

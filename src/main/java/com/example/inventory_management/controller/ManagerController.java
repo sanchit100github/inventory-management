@@ -164,8 +164,8 @@ public class ManagerController {
                 if(!userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
                     return new ResponseEntity<>("Employee with this email does not exist", HttpStatus.NOT_FOUND);
                 }
-                boolean test = userService.updateUser(user1);
-                if(test) {
+                User test = userService.updateUser(user1);
+                if(test!=null) {
                     AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated employee " + user1.getEmail(), List.of(user.get().getAssigned().getAddedby()));
                     auditLogRepository.save(log);
                     return new ResponseEntity<>("Employee has been updated", HttpStatus.OK);
