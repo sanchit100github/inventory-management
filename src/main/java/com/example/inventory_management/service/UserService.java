@@ -38,9 +38,10 @@ public class UserService {
 
     public User updateUser(User user) {
         Optional<User> user1 = userRepository.findById(user.getId());
-        user.setAssigned(user.getAssigned());
-        if (!user1.get().getPassword().equals(passwordEncoder.encode(user.getPassword()))) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if(user1.isPresent()) {
+            User finaluser = user1.get();
+            finaluser.setAssigned(user.getAssigned());
+            finaluser.setContact(user.getContact());
         }
         return userRepository.save(user);
     }
