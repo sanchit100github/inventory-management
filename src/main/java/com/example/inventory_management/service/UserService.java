@@ -110,8 +110,15 @@ public class UserService {
     }
 
     public List<Role> getReqRolesEmployee(User user) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getReqRolesEmployee'");
+        List<Role> roles = roleRepository.findByNameNot("ADMIN");
+        Iterator<Role> iterator = roles.iterator();
+        while (iterator.hasNext()) {
+            Role it = iterator.next();
+            if(!it.getAddedby().getName().equals(user.getAssigned().getName())) {
+                iterator.remove(); 
+            }
+        }
+        return roles;
     }
 
 }

@@ -65,7 +65,7 @@ public class CustomerService {
     }
 
     public Object findCustomersByActive() {
-        return customerRepository.findAllByActive();
+        return customerRepository.findAllByActive(true);
     }
 
 }

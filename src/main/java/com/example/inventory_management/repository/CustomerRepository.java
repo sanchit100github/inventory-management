@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CustomerRepository extends MongoRepository<Customer, String> {
-        List<Customer> findAllByActive();
+        List<Customer> findAllByActive(boolean b);
         Optional<Customer> findByName(String name);
 }
