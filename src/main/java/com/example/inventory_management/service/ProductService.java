@@ -73,44 +73,6 @@ public class ProductService {
         }
     }
 
-    public String getManagerRoleByCategory(String category) {
-        Map<String, String> categoryToManager = new HashMap<>();
-        
-        // Mapping categories to their respective manager roles
-        categoryToManager.put("Smartphones", "MANAGER_Electronics");
-        categoryToManager.put("Laptops", "MANAGER_Electronics");
-        categoryToManager.put("TV", "MANAGER_Electronics");
-        categoryToManager.put("Refrigerators", "MANAGER_Electronics");
-        categoryToManager.put("AC", "MANAGER_Electronics");
-        
-        categoryToManager.put("Sofa", "MANAGER_Furniture");
-        categoryToManager.put("DiningTables", "MANAGER_Furniture");
-        categoryToManager.put("StudyTables", "MANAGER_Furniture");
-        categoryToManager.put("Chairs", "MANAGER_Furniture");
-        categoryToManager.put("Bed", "MANAGER_Furniture");
-
-        categoryToManager.put("Cricket", "MANAGER_Sports");
-        categoryToManager.put("Football", "MANAGER_Sports");
-        categoryToManager.put("Hockey", "MANAGER_Sports");
-        categoryToManager.put("Volleyball", "MANAGER_Sports");
-        categoryToManager.put("TableTennis", "MANAGER_Sports");
-
-        categoryToManager.put("Plumbing", "MANAGER_Hardware");
-        categoryToManager.put("Paint", "MANAGER_Hardware");
-        categoryToManager.put("Electrical", "MANAGER_Hardware");
-        categoryToManager.put("Gardening", "MANAGER_Hardware");
-        categoryToManager.put("Power", "MANAGER_Hardware");
-
-        categoryToManager.put("ActionFigures", "MANAGER_Toys");
-        categoryToManager.put("Board", "MANAGER_Toys");
-        categoryToManager.put("Educational", "MANAGER_Toys");
-        categoryToManager.put("VideoGames", "MANAGER_Toys");
-        categoryToManager.put("Stuffed", "MANAGER_Toys");
-
-        // Get the manager role based on the category
-        return categoryToManager.getOrDefault(category, "");
-    }
-
 
     // Get filtered products
     public List<Product> getFilteredProducts(String category, Double minPrice, Double maxPrice, Boolean inStock, 

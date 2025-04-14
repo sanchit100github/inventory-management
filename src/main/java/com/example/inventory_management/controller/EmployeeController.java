@@ -164,10 +164,9 @@ public class EmployeeController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
-                List<String> categories = userService.getCategories(user.get());
                 Optional<Product> existingProduct = productService.getProductById(id);
-                Product product = existingProduct.get();
-                if(existingProduct.isPresent() && categories.contains(existingProduct.get().getMainCategory())) {
+                if(existingProduct.isPresent() && existingProduct.get().getAddedby().getName().equals(user.get().getAssigned().getName().replace("EMPLOYEE_", ""))) {
+                    Product product = existingProduct.get();
                     productService.deleteProduct(id);
                     AuditLog log = new AuditLog(user.get().getEmail(), "DELETE", "deleted product " + product.getName(), List.of(user.get().getAssigned().getAddedby()));
                     auditLogService.saveAudit(log);
