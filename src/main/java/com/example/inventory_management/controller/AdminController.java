@@ -284,9 +284,11 @@ public class AdminController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
                 if (supplierService.getSupplierById(supplier.getSupplierId()).isPresent()) {
-                    if (!supplierService.getSupplierByName(supplier.getName()).get().getSupplierId()
-                            .equals(supplier.getSupplierId())) {
-                        return new ResponseEntity<>("Supplier with this name already exists", HttpStatus.CONFLICT);
+                    Optional<Supplier> optSupplier = supplierService.getSupplierByName(supplier.getName());
+                    if (optSupplier.isPresent()) { 
+                        if(optSupplier.get().getSupplierId().equals(supplier.getSupplierId())){
+                            return new ResponseEntity<>("Customer with this name already exists", HttpStatus.CONFLICT);
+                        }
                     }
                     try {
                         supplierService.updateSupplier(supplier);
@@ -400,9 +402,11 @@ public class AdminController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("ADMIN")) {
                 if (customerService.getCustomerById(customer.getCustomerId()).isPresent()) {
-                    if (customerService.getCustomerByName(customer.getName()).get().getCustomerId()
-                            .equals(customer.getCustomerId())) {
-                        return new ResponseEntity<>("Customer with this name already exists", HttpStatus.CONFLICT);
+                    Optional<Customer> optSupplier = customerService.getCustomerByName(customer.getName());
+                    if (optSupplier.isPresent()) { 
+                        if(optSupplier.get().getCustomerId().equals(customer.getCustomerId())){
+                            return new ResponseEntity<>("Customer with this name already exists", HttpStatus.CONFLICT);
+                        }
                     }
                     try {
                         customerService.updateCustomer(customer);
