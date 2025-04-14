@@ -146,8 +146,8 @@ public class AdminController {
                 if (userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
                     return new ResponseEntity<>("Manager with this email already exists", HttpStatus.CONFLICT);
                 }
-                boolean test = userService.saveNewUser(user1);
-                if (test) {
+                User test = userService.saveNewUser(user1);
+                if (test!=null) {
                     AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added manager " + user1.getEmail(),
                             List.of(user.get().getAssigned()));
                     auditLogService.saveAudit(log);
