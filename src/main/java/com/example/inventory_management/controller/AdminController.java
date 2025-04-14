@@ -83,7 +83,7 @@ public class AdminController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().equals("ADMIN")) {
-                List<Role> roles = userService.getReqRoles(user.get());
+                List<Role> roles = userService.getReqRolesManager(user.get());
                 return new ResponseEntity<>(roles, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
@@ -97,7 +97,7 @@ public class AdminController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().equals("ADMIN")) {
-                List<Role> roles = userService.getReqRoles(user.get());
+                List<Role> roles = userService.getReqRolesManager(user.get());
                 return new ResponseEntity<>(roles, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);

@@ -67,11 +67,13 @@ public class UserService {
         userRepository.deleteByEmailAndActive(email, true);
     }
 
-    public List<Role> getReqRoles(User user) {
+    public List<Role> getReqRolesManager(User user) {
         List<Role> roles = roleRepository.findByNameNot("ADMIN");
-        for(Role it : roles) {
-            if(!it.getAddedby().getName().equals(user.getAssigned().getName())) {
-                roles.remove(it);
+        Iterator<Role> iterator = roles.iterator();
+        while (iterator.hasNext()) {
+            Role it = iterator.next();
+            if(!it.getAddedby().getName().startsWith("ADMIN")) {
+                iterator.remove(); 
             }
         }
         return roles;
@@ -105,6 +107,11 @@ public class UserService {
             }
         }
         return employees;
+    }
+
+    public List<Role> getReqRolesEmployee(User user) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getReqRolesEmployee'");
     }
 
 }

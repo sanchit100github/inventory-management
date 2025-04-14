@@ -96,7 +96,7 @@ public class ManagerController {
         Optional<User> user = getUser();
         if(user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("MANAGER")) {
-                List<Role> roles = userService.getReqRoles(user.get());
+                List<Role> roles = userService.getReqRolesEmployee(user.get());
                 return new ResponseEntity<>(roles, HttpStatus.OK);
             }
             else {
