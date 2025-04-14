@@ -119,7 +119,7 @@ public class EmployeeController {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }
         }
-        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>("User not logged in", HttpStatus.FORBIDDEN);
     }
 
     @PostMapping("/getproduct")
@@ -162,23 +162,30 @@ public class EmployeeController {
     public ResponseEntity<?> deteteProduct(@RequestBody Map<String, String> requestBody) {
         String id = requestBody.get("id");
         Optional<User> user = getUser();
+        System.out.println(id);
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
                 Optional<Product> existingProduct = productService.getProductById(id);
-                if(existingProduct.isPresent() && existingProduct.get().getAddedby().getName().equals(user.get().getAssigned().getName().replace("EMPLOYEE_", ""))) {
+                if(existingProduct.isPresent()) {
                     Product product = existingProduct.get();
-                    productService.deleteProduct(id);
-                    AuditLog log = new AuditLog(user.get().getEmail(), "DELETE", "deleted product " + product.getName(), List.of(user.get().getAssigned().getAddedby()));
-                    auditLogService.saveAudit(log);
+                    if(product.getAddedby().equals(user.get().getAssigned())) {
+                        productService.deleteProduct(id);
+                        AuditLog log = new AuditLog(user.get().getEmail(), "DELETE", "deleted product " + product.getName(), List.of(user.get().getAssigned().getAddedby()));
+                        auditLogService.saveAudit(log);
+                        return new ResponseEntity<>("Product has been deleted", HttpStatus.OK);
+                    }
+                    else {
+                        return new ResponseEntity<>("You do not have the access to this product", HttpStatus.FORBIDDEN);
+                    }
                 }
                 else {
-                    return new ResponseEntity<>("Product not found or you do not have access to this product ", HttpStatus.FORBIDDEN);
+                    return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
                 }
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }
         }
-        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);  
+        return new ResponseEntity<>("User not logged in", HttpStatus.FORBIDDEN);  
     }
 
     @PostMapping("/addrefillrequest")

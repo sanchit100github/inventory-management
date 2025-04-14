@@ -49,28 +49,28 @@ public class ProductService {
     public Product updateProduct(String id, Product product) {
         Optional<Product> existingProduct = productRepository.findById(id);
         if (existingProduct.isPresent()) {
-            Product updatedProduct = existingProduct.get();
-            updatedProduct.setName(product.getName());
-            updatedProduct.setMainCategory(product.getMainCategory());
-            updatedProduct.setSubCategory(product.getSubCategory());
-            updatedProduct.setDescription(product.getDescription());
-            updatedProduct.setStockLevel(product.getStockLevel());
-            updatedProduct.setReorderLevel(product.getReorderLevel());
-            if(updatedProduct.getActive().equals(false) && product.getActive().equals(true)) {
-                updatedProduct.setTimestamp(LocalDateTime.now());
+            existingProduct.get().setName(product.getName());
+            existingProduct.get().setMainCategory(product.getMainCategory());
+            existingProduct.get().setSubCategory(product.getSubCategory());
+            existingProduct.get().setDescription(product.getDescription());
+            existingProduct.get().setStockLevel(product.getStockLevel());
+            existingProduct.get().setReorderLevel(product.getReorderLevel());
+            if(existingProduct.get().getActive().equals(false) && product.getActive().equals(true)) {
+                existingProduct.get().setTimestamp(LocalDateTime.now());
             }
-            return productRepository.save(updatedProduct);
+            return productRepository.save(existingProduct.get());
         }
         return null; // Or throw an exception if the product is not found
     }
 
     // Delete product by ID
-    public void deleteProduct(String id) {
+    public Product deleteProduct(String id) {
         Optional<Product> existingProduct = productRepository.findById(id);
         if(existingProduct.isPresent()) {
             existingProduct.get().setActive(false);
-            productRepository.save(existingProduct.get());
+            return productRepository.save(existingProduct.get());
         }
+        return null;
     }
 
 
