@@ -16,7 +16,7 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     List<Product> findAllByMainCategory(String role);
 
-    List<Product> findAllByMainCategoryAndActive(String role);
+    List<Product> findAllByMainCategoryAndActive(String role, boolean b);
 
     List<Product> findAllByMainCategoryAndActiveFalse(String role);
 

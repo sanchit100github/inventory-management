@@ -25,7 +25,7 @@ public class ProductService {
 
     // Get all products
     public List<Product> getAllProducts(User user) {
-        return productRepository.findAllByMainCategoryAndActive(user.getAssigned().getName().replace("EMPLOYEE_", ""));
+        return productRepository.findAllByMainCategoryAndActive(user.getAssigned().getName().replace("EMPLOYEE_", ""), true);
     }
 
     // Get product by ID
@@ -160,7 +160,7 @@ public class ProductService {
     }
 
 	public List<Product> getByActiveAndMonthAndYearAndRole(String role, Integer month, Integer year) {
-		List<Product> products = productRepository.findAllByMainCategoryAndActive(role);
+		List<Product> products = productRepository.findAllByMainCategoryAndActive(role, true);
         List<Product> finalList = new ArrayList<>();
         for(Product it : products) {
             if(it.getTimestamp().getMonthValue() == month && it.getTimestamp().getYear() == year) {
