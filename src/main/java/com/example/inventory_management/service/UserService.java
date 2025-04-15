@@ -95,8 +95,15 @@ public class UserService {
         Iterator<User> iterator = employees.iterator();
         while (iterator.hasNext()) {
             User it = iterator.next();
-            if (!it.getAssigned().getName().startsWith("EMPLOYEE") || !it.getAssigned().getAddedby().equals(user.getAssigned())) {
+            if (!it.getAssigned().getName().startsWith("EMPLOYEE")) {     
                 iterator.remove(); 
+            }
+        }
+        Iterator<User> iterator2 = employees.iterator();
+        while (iterator2.hasNext()) {
+            User it = iterator2.next();
+            if(!it.getAssigned().getAddedby().equals(user.getAssigned())) {
+                iterator2.remove(); 
             }
         }
         return employees;

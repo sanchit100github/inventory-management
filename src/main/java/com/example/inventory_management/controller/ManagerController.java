@@ -140,7 +140,6 @@ public class ManagerController {
                 if (userRepository.findByEmailAndActive(user1.getEmail(), true).isPresent()) {
                     return new ResponseEntity<>("Employee with this email already exists", HttpStatus.CONFLICT);
                 }
-                user1.setAssigned(user.get().getAssigned());
                 User test = userService.saveNewUser(user1);
                 if (test != null) {
                     AuditLog log = new AuditLog(user.get().getEmail(), "ADD", "Added employee " + user1.getEmail(),
@@ -207,9 +206,6 @@ public class ManagerController {
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("MANAGER")) {
                 userList = userService.getAllEmployees(user.get());
-                if (userList.isEmpty()) {
-                    return new ResponseEntity<>("No employee found", HttpStatus.NOT_FOUND);
-                }
                 return new ResponseEntity<>(userList, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
