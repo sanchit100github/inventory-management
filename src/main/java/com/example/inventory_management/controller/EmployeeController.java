@@ -99,21 +99,18 @@ public class EmployeeController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("EMPLOYEE")) {
-                List<String> categories = userService.getCategories(user.get());
-                if(categories.contains(product.getMainCategory())) {
-                    Optional<Product> existingProduct = productService.getProductById(product.getProductId());
-                    if (existingProduct.isPresent()) {
-                        Product updatedProduct = productService.updateProduct(product.getProductId(), product);
-                        if (updatedProduct!=null) {
-                            AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated product " + updatedProduct.getName(), List.of(user.get().getAssigned().getAddedby()));
-                            auditLogService.saveAudit(log);
-                            return new ResponseEntity<>("Product has been updated", HttpStatus.OK);
-                        } else {
-                            return new ResponseEntity<>("Product update failed", HttpStatus.INTERNAL_SERVER_ERROR);
-                        }
+                Optional<Product> existingProduct = productService.getProductById(product.getProductId());
+                if (existingProduct.isPresent()) {
+                    Product updatedProduct = productService.updateProduct(product.getProductId(), product);
+                    if (updatedProduct!=null) {
+                        AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated product " + updatedProduct.getName(), List.of(user.get().getAssigned().getAddedby()));
+                        auditLogService.saveAudit(log);
+                        return new ResponseEntity<>("Product has been updated", HttpStatus.OK);
                     } else {
-                        return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
+                        return new ResponseEntity<>("Product update failed", HttpStatus.INTERNAL_SERVER_ERROR);
                     }
+                } else {
+                    return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
                 }
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);

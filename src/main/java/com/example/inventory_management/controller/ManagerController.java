@@ -251,7 +251,7 @@ public class ManagerController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("MANAGER")) {
-                List<SupplierOrder> orders = supplierOrderService.getOrdersByStatus(status);
+                List<SupplierOrder> orders = supplierOrderService.getOrdersByStatus(status, user.get());
                 return new ResponseEntity<>(orders, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
@@ -371,7 +371,7 @@ public class ManagerController {
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if(user.get().getAssigned().getName().startsWith("MANAGER")) {
-                List<CustomerOrder> orders = customerOrderService.getOrdersByStatus(status, user);
+                List<CustomerOrder> orders = customerOrderService.getOrdersByStatus(status, user.get());
                 return new ResponseEntity<>(orders, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
