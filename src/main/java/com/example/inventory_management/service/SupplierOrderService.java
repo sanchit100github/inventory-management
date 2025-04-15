@@ -4,6 +4,7 @@ import com.example.inventory_management.model.Batch;
 import com.example.inventory_management.model.OrderProduct;
 import com.example.inventory_management.model.Product;
 import com.example.inventory_management.model.SupplierOrder;
+import com.example.inventory_management.model.User;
 import com.example.inventory_management.repository.SupplierOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,9 +42,17 @@ public class SupplierOrderService {
     }
 
     // Get orders by status (e.g., "Pending", "Shipped")
-    public List<SupplierOrder> getOrdersByStatus(String status) {
-        return supplierOrderRepository.findAllByStatus(status);
+    public List<SupplierOrder> getOrdersByStatus(String status, User user) {
+        List<SupplierOrder> orders = supplierOrderRepository.findAllByStatus(status);
+        List<SupplierOrder> finalList = new ArrayList<>();
+        for(SupplierOrder it : orders) {
+            if(it.getOrderedby().equals(user.getAssigned())) {
+                finalList.add(it);
+            }
+        }
+        return finalList;
     }
+
     // Create or update a supplier order
     public SupplierOrder saveNewOrder(SupplierOrder order) {
         double total=0;

@@ -5,6 +5,7 @@ import com.example.inventory_management.model.CustomerOrder;
 import com.example.inventory_management.model.OrderProduct;
 import com.example.inventory_management.model.Product;
 import com.example.inventory_management.model.TempBatch;
+import com.example.inventory_management.model.User;
 import com.example.inventory_management.repository.CustomerOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -165,6 +166,17 @@ public class CustomerOrderService {
         List<CustomerOrder> finalList = new ArrayList<>();
         for(CustomerOrder it : customerOrder) {
             if(it.getTimestamp().getMonthValue() == month && it.getTimestamp().getYear() == year) {
+                finalList.add(it);
+            }
+        }
+        return finalList;
+    }
+
+    public List<CustomerOrder> getOrdersByStatus(String status, User user) {
+        List<CustomerOrder> orders = customerOrderRepository.findAllByStatus(status);
+        List<CustomerOrder> finalList = new ArrayList<>();
+        for(CustomerOrder it : orders) {
+            if(it.getOrderedby().equals(user.getAssigned())) {
                 finalList.add(it);
             }
         }

@@ -10,5 +10,6 @@ import java.util.List;
 public interface CustomerOrderRepository extends MongoRepository<CustomerOrder, String> {
     List<CustomerOrder> findByCustomerId(String customerId);
     List<CustomerOrder> findByStatus(String status);
+    List<CustomerOrder> findAllByStatus(String status);
 }
 

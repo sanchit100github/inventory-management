@@ -242,6 +242,21 @@ public class ManagerController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
+    @PostMapping("/supplierorder/getorders")
+    public ResponseEntity<?> getSupplierOrders(@RequestBody Map<String, String> requestBody) {
+        String status = requestBody.get("status");
+        Optional<User> user = getUser();
+        if (user.isPresent()) {
+            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+                List<SupplierOrder> orders = supplierOrderService.getOrdersByStatus(status);
+                return new ResponseEntity<>(orders, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
     @PostMapping("/supplierorder/addorder")
     public ResponseEntity<?> addSupplierOrder(@RequestBody SupplierOrder order) {
         Optional<User> user = getUser();
@@ -333,6 +348,21 @@ public class ManagerController {
                 AuditLog log = new AuditLog(user.get().getEmail(), "UPDATE", "Updated order " + supplierOrderService.getOrderById(id) + "status to " + status, List.of(user.get().getAssigned().getAddedby()));
                 auditLogService.saveAudit(log);
                 return new ResponseEntity<>("Order status updated", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
+    }
+
+    @PostMapping("/customerorder/getorders")
+    public ResponseEntity<?> getCustomersOrders(@RequestBody Map<String, String> requestBody) {
+        String status = requestBody.get("status");
+        Optional<User> user = getUser();
+        if (user.isPresent()) {
+            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+                List<CustomerOrder> orders = customerOrderService.getOrdersByStatus(status, user);
+                return new ResponseEntity<>(orders, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }
