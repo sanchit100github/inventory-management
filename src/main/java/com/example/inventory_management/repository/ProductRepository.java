@@ -22,4 +22,6 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     List<Product> findAllByAddedby(Role role);
 
+    List<Product> findAllByActive(boolean b);
+
 }

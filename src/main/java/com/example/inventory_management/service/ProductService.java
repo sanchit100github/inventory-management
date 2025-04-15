@@ -50,7 +50,6 @@ public class ProductService {
         Optional<Product> existingProduct = productRepository.findById(id);
         if (existingProduct.isPresent()) {
             existingProduct.get().setName(product.getName());
-            existingProduct.get().setMainCategory(product.getMainCategory());
             existingProduct.get().setSubCategory(product.getSubCategory());
             existingProduct.get().setDescription(product.getDescription());
             existingProduct.get().setStockLevel(product.getStockLevel());
@@ -147,7 +146,9 @@ public class ProductService {
         List<Product> products = productRepository.findAllByAddedby(role);
         List<Product> finalList = new ArrayList<>();
         for(Product it : products) {
-            finalList.add(it);
+            if(it.getReorderLevel()>=it.getStockLevel()) {
+                finalList.add(it);
+            }
         }
         return finalList;
     }
