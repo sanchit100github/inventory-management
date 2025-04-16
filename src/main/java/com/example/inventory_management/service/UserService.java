@@ -114,7 +114,7 @@ public class UserService {
         Iterator<Role> iterator = roles.iterator();
         while (iterator.hasNext()) {
             Role it = iterator.next();
-            if(!it.getAddedby().getName().equals(user.getAssigned().getName())) {
+            if(!it.getAddedby().equals(user.getAssigned())) {
                 iterator.remove(); 
             }
         }
