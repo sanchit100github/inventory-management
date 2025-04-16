@@ -202,10 +202,9 @@ public class ManagerController {
     @GetMapping("/getallemployees")
     public ResponseEntity<?> findAllEmployees() {
         Optional<User> user = getUser();
-        List<User> userList;
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("MANAGER")) {
-                userList = userService.getAllEmployees(user.get());
+                List<User> userList = userService.getAllEmployees(user.get());
                 return new ResponseEntity<>(userList, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
@@ -246,7 +245,7 @@ public class ManagerController {
         String status = requestBody.get("status");
         Optional<User> user = getUser();
         if (user.isPresent()) {
-            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+            if (user.get().getAssigned().getName().startsWith("MANAGER")) {
                 List<SupplierOrder> orders = supplierOrderService.getOrdersByStatus(status, user.get());
                 return new ResponseEntity<>(orders, HttpStatus.OK);
             } else {
@@ -366,7 +365,7 @@ public class ManagerController {
         String status = requestBody.get("status");
         Optional<User> user = getUser();
         if (user.isPresent()) {
-            if(user.get().getAssigned().getName().startsWith("MANAGER")) {
+            if (user.get().getAssigned().getName().startsWith("MANAGER")) {
                 List<CustomerOrder> orders = customerOrderService.getOrdersByStatus(status, user.get());
                 return new ResponseEntity<>(orders, HttpStatus.OK);
             } else {
