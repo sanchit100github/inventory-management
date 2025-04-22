@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.inventory_management.model.AuditLog;
@@ -215,18 +214,19 @@ public class ManagerController {
     }
 
     @PutMapping("/deleteemployee")
-    public ResponseEntity<?> deleteEmployee(@RequestParam String email) {
+    public ResponseEntity<?> deleteEmployee(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
         Optional<User> user = getUser();
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("MANAGER")) {
-                Optional<User> manager = userRepository.findByEmailAndActive(email, true);
-                if (manager.isPresent()) {
-                    User managerToUpdate = manager.get();
-                    managerToUpdate.setActive(false);
-                    userRepository.save(managerToUpdate);
+                Optional<User> employee = userRepository.findByEmailAndActive(email, true);
+                if (employee.isPresent()) {
+                    User employeeToUpdate = employee.get();
+                    employeeToUpdate.setActive(false);
+                    userRepository.save(employeeToUpdate);
 
                     AuditLog log = new AuditLog(user.get().getEmail(), "DEACTIVATE",
-                            "Deactivated employee " + managerToUpdate.getEmail(),
+                            "Deactivated employee " + employeeToUpdate.getEmail(),
                             List.of(user.get().getAssigned().getAddedby()));
                     auditLogRepository.save(log);
 
