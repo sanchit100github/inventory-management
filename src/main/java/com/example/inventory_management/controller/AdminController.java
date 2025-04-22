@@ -486,7 +486,7 @@ public class AdminController {
         return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping("/generatereport")
+    @PostMapping("/generatereport")
     public ResponseEntity<?> generateAdminReport(@RequestBody Map<String, Integer> requestBody,
             HttpServletResponse response) throws IOException {
         Optional<User> user = getUser();

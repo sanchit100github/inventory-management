@@ -424,8 +424,8 @@ public class ReportService {
         List<Product> newActiveProducts = productService.getByActiveAndMonthAndYearAndRole(role, month, year);
         List<Product> newDeleatedProducts = productService.getByNotActiveAndMonthAndYearAndRole(role, month, year);
 
-        Product mostOrderedProduct;
-        Product leastOrderedProduct;
+        Product mostOrderedProduct = null;
+        Product leastOrderedProduct = null;
 
         Map<String, Integer> productOrderCount = new HashMap<>();
 
@@ -454,8 +454,12 @@ public class ReportService {
             }
         }
 
-        mostOrderedProduct = productRepository.findByProductId(maxOrderedProductId).get();
-        leastOrderedProduct = productRepository.findByProductId(minOrderedProductId).get();
+        if(productRepository.findByProductId(maxOrderedProductId).isPresent()) {
+            mostOrderedProduct = productRepository.findByProductId(maxOrderedProductId).get();
+        }
+        if(productRepository.findByProductId(minOrderedProductId).isPresent()) {
+            leastOrderedProduct = productRepository.findByProductId(minOrderedProductId).get();
+        }
 
         Product mostProfitableProduct = null;
         Product leastProfitableProduct = null;
@@ -520,7 +524,7 @@ public class ReportService {
 
     private String generateManagerHtmlContent(ManagerReportData reportData) {
         StringBuilder htmlContent = new StringBuilder();
-        
+    
         htmlContent.append("<html>")
             .append("<head>")
             .append("<style>")
@@ -534,85 +538,95 @@ public class ReportService {
             .append("</style>")
             .append("</head>")
             .append("<body>");
-        
+    
         htmlContent.append("<h2>Manager Report</h2>")
             .append("<h3>Summary</h3>")
             .append("<p><strong>Total Customer Payments:</strong> $")
-            .append(String.format("%.2f", reportData.getCustomerPaymentsTotal()))
+            .append(String.format("%.2f", reportData.getCustomerPaymentsTotal() != null ? reportData.getCustomerPaymentsTotal() : 0.0))
             .append("</p>")
             .append("<p><strong>Total Supplier Payments:</strong> $")
-            .append(String.format("%.2f", reportData.getSupplierPaymentsTotal()))
+            .append(String.format("%.2f", reportData.getSupplierPaymentsTotal() != null ? reportData.getSupplierPaymentsTotal() : 0.0))
             .append("</p>")
             .append("<p><strong>Net Payments Total:</strong> $")
-            .append(String.format("%.2f", reportData.getPaymentsTotal()))
+            .append(String.format("%.2f", reportData.getPaymentsTotal() != null ? reportData.getPaymentsTotal() : 0.0))
             .append("</p>")
             .append("<p><strong>Total Customer Orders:</strong> $")
-            .append(String.format("%.2f", reportData.getCustomerTotal()))
+            .append(String.format("%.2f", reportData.getCustomerTotal() != null ? reportData.getCustomerTotal() : 0.0))
             .append("</p>")
             .append("<p><strong>Total Supplier Orders:</strong> $")
-            .append(String.format("%.2f", reportData.getSupplierTotal()))
+            .append(String.format("%.2f", reportData.getSupplierTotal() != null ? reportData.getSupplierTotal() : 0.0))
             .append("</p>")
             .append("<p><strong>Net Order Profit/Loss:</strong> <span class='")
-            .append(reportData.getOrdersTotal() >= 0 ? "highlight" : "negative")
+            .append(reportData.getOrdersTotal() != null && reportData.getOrdersTotal() >= 0 ? "highlight" : "negative")
             .append("'>$")
-            .append(String.format("%.2f", reportData.getOrdersTotal()))
+            .append(String.format("%.2f", reportData.getOrdersTotal() != null ? reportData.getOrdersTotal() : 0.0))
             .append("</span></p>");
-        
+    
         htmlContent.append("<h3>Godown Profit/Loss Overview</h3>")
             .append("<table>")
             .append("<tr><th>Godown</th><th>Profit/Loss ($)</th></tr>");
-        
-        for (Map.Entry<String, Double> entry : reportData.getGodownAggregate().entrySet()) {
-            htmlContent.append("<tr>")
-                .append("<td>").append(entry.getKey()).append("</td>")
-                .append("<td class='")
-                .append(entry.getValue() >= 0 ? "highlight" : "negative")
-                .append("'>$")
-                .append(String.format("%.2f", entry.getValue()))
-                .append("</td>")
-                .append("</tr>");
+    
+        if (reportData.getGodownAggregate() != null) {
+            for (Map.Entry<String, Double> entry : reportData.getGodownAggregate().entrySet()) {
+                htmlContent.append("<tr>")
+                    .append("<td>").append(entry.getKey() != null ? entry.getKey() : "").append("</td>")
+                    .append("<td class='")
+                    .append(entry.getValue() != null && entry.getValue() >= 0 ? "highlight" : "negative")
+                    .append("'>$")
+                    .append(String.format("%.2f", entry.getValue() != null ? entry.getValue() : 0.0))
+                    .append("</td>")
+                    .append("</tr>");
+            }
         }
         htmlContent.append("</table>");
-        
+    
         htmlContent.append("<h3>Most Ordered & Least Ordered Products</h3>")
             .append("<p><strong>Most Ordered:</strong> ")
-            .append(reportData.getMostOrderedProduct().getName())
+            .append(reportData.getMostOrderedProduct() != null && reportData.getMostOrderedProduct().getName() != null 
+                    ? reportData.getMostOrderedProduct().getName() : "")
             .append(" (ID: ")
-            .append(reportData.getMostOrderedProduct().getProductId())
+            .append(reportData.getMostOrderedProduct() != null && reportData.getMostOrderedProduct().getProductId() != null 
+                    ? reportData.getMostOrderedProduct().getProductId() : "")
             .append(")</p>")
             .append("<p><strong>Least Ordered:</strong> ")
-            .append(reportData.getLeastOrderedProduct().getName())
+            .append(reportData.getLeastOrderedProduct() != null && reportData.getLeastOrderedProduct().getName() != null 
+                    ? reportData.getLeastOrderedProduct().getName() : "")
             .append(" (ID: ")
-            .append(reportData.getLeastOrderedProduct().getProductId())
+            .append(reportData.getLeastOrderedProduct() != null && reportData.getLeastOrderedProduct().getProductId() != null 
+                    ? reportData.getLeastOrderedProduct().getProductId() : "")
             .append(")</p>");
-        
+    
         htmlContent.append("<h3>Most Profitable & Least Profitable Products</h3>")
             .append("<p><strong>Most Profitable:</strong> ")
-            .append(reportData.getMostProfitableProduct().getName())
-            .append(")</p>")
+            .append(reportData.getMostProfitableProduct() != null && reportData.getMostProfitableProduct().getName() != null 
+                    ? reportData.getMostProfitableProduct().getName() : "")
+            .append("</p>")
             .append("<p><strong>Least Profitable:</strong> ")
-            .append(reportData.getLeastProfitableProduct().getName())
-            .append(")</p>");
-        
+            .append(reportData.getLeastProfitableProduct() != null && reportData.getLeastProfitableProduct().getName() != null 
+                    ? reportData.getLeastProfitableProduct().getName() : "")
+            .append("</p>");
+    
         htmlContent.append("<h3>New & Deleted Products</h3>")
             .append("<p><strong>New Active Products:</strong> ")
-            .append(reportData.getNewActiveProducts().size())
+            .append(reportData.getNewActiveProducts() != null ? reportData.getNewActiveProducts().size() : 0)
             .append("</p>")
             .append("<p><strong>Deleted Products:</strong> ")
-            .append(reportData.getNewDeletedProducts().size())
+            .append(reportData.getNewDeletedProducts() != null ? reportData.getNewDeletedProducts().size() : 0)
             .append("</p>");
-        
+    
         htmlContent.append("<h3>Cancelled Orders</h3>")
             .append("<p><strong>Cancelled Customer Orders:</strong> ")
-            .append(reportData.getCancelledCustomerOrders().size())
+            .append(reportData.getCancelledCustomerOrders() != null ? reportData.getCancelledCustomerOrders().size() : 0)
             .append("</p>")
             .append("<p><strong>Cancelled Supplier Orders:</strong> ")
-            .append(reportData.getCancelledSupplierOrders().size())
+            .append(reportData.getCancelledSupplierOrders() != null ? reportData.getCancelledSupplierOrders().size() : 0)
             .append("</p>");
-        
+    
         htmlContent.append("</body></html>");
+    
         return htmlContent.toString();
     }
+    
     
     
 }    

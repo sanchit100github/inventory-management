@@ -16,12 +16,12 @@ public class ManagerReportData {
     private Map<String, Pair<List<String>, Pair<Integer, Double>>> supplierPaymentsMap;
     private Map<String, Pair<List<String>, Pair<Integer, Double>>> customerPaymentsMap;
 
-    private double customerPaymentsTotal;
-    private double supplierPaymentsTotal;
-    private double paymentsTotal;
-    private double supplierTotal;
-    private double customerTotal;
-    private double ordersTotal;
+    private Double customerPaymentsTotal;
+    private Double supplierPaymentsTotal;
+    private Double paymentsTotal;
+    private Double supplierTotal;
+    private Double customerTotal;
+    private Double ordersTotal;
 
     private Map<String, Double> godownAggregate;
 
@@ -41,12 +41,12 @@ public class ManagerReportData {
             Map<String, Pair<List<String>, Integer>> customerOrdersMap,
             Map<String, Pair<List<String>, Pair<Integer, Double>>> supplierPaymentsMap,
             Map<String, Pair<List<String>, Pair<Integer, Double>>> customerPaymentsMap,
-            double customerPaymentsTotal,
-            double supplierPaymentsTotal,
-            double paymentsTotal,
-            double supplierTotal,
-            double customerTotal,
-            double ordersTotal,
+            Double customerPaymentsTotal,
+            Double supplierPaymentsTotal,
+            Double paymentsTotal,
+            Double supplierTotal,
+            Double customerTotal,
+            Double ordersTotal,
             Map<String, Double> godownAggregate,
             List<Product> newActiveProducts,
             List<Product> newDeletedProducts,
