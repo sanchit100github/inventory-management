@@ -1,6 +1,5 @@
 package com.example.inventory_management.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,6 @@ import com.example.inventory_management.repository.CustomerRepository;
 import com.example.inventory_management.repository.PaymentRepository;
 import com.example.inventory_management.repository.ProductRepository;
 import com.example.inventory_management.repository.SupplierRepository;
-import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.io.IOException;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -61,7 +59,7 @@ public class ReportService {
     @Autowired
     SupplierOrderService supplierOrderService;
 
-    public void generateAdminReport(int month, int year, HttpServletResponse response) throws IOException {
+    public String generateAdminReport(int month, int year, HttpServletResponse response) throws IOException {
 
         List<Supplier> suppliers = supplierRepository.findAllByActive(true);
         List<String> supplierNames = new ArrayList<>();
@@ -207,15 +205,15 @@ public class ReportService {
         );
  
         String htmlContent = generateAdminHtmlContent(reportData);
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=AdminReport(" + LocalDateTime.now()+").pdf");
-        try {
-            HtmlConverter.convertToPdf(htmlContent, response.getOutputStream());
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-        }
+        return htmlContent;
+        // response.setContentType("application/pdf");
+        // response.setHeader("Content-Disposition", "attachment; filename=AdminReport(" + LocalDateTime.now()+").pdf");
+        // try {
+        //     HtmlConverter.convertToPdf(htmlContent, response.getOutputStream());
+        // } catch (java.io.IOException e) {
+        //     e.printStackTrace();
+        // }
     }
-
 
     private String generateAdminHtmlContent(AdminReportData reportData) {
         StringBuilder htmlContent = new StringBuilder();
@@ -308,7 +306,7 @@ public class ReportService {
         return htmlContent.toString();
     }
 
-    public void generateManagerReport(String role, Integer month, Integer year, HttpServletResponse response) {
+    public String generateManagerReport(String role, Integer month, Integer year, HttpServletResponse response) {
 
         List<SupplierOrder> supplierOrders = supplierOrderService.findAllByMonthAndYearAndRole(role, month, year);
         List<CustomerOrder> customerOrders = customerOrderService.findAllByMonthAndYearAndRole(role, month, year);
@@ -512,13 +510,14 @@ public class ReportService {
         );
 
         String htmlContent = generateManagerHtmlContent(reportData);
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=AdminReport(" + LocalDateTime.now()+").pdf");
-        try {
-            HtmlConverter.convertToPdf(htmlContent, response.getOutputStream());
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-        }
+        return htmlContent;
+        // response.setContentType("application/pdf");
+        // response.setHeader("Content-Disposition", "attachment; filename=AdminReport(" + LocalDateTime.now()+").pdf");
+        // try {
+        //     HtmlConverter.convertToPdf(htmlContent, response.getOutputStream());
+        // } catch (java.io.IOException e) {
+        //     e.printStackTrace();
+        // }
 
     }
 

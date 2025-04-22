@@ -36,6 +36,7 @@ import com.example.inventory_management.service.RefillService;
 import com.example.inventory_management.service.ReportService;
 import com.example.inventory_management.service.SupplierOrderService;
 import com.example.inventory_management.service.UserService;
+import com.itextpdf.html2pdf.HtmlConverter;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -484,9 +485,20 @@ public class ManagerController {
         Integer year = requestBody.get("year");
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("MANAGER")) {
-                reportService.generateManagerReport(user.get().getAssigned().getName().replaceFirst("^MANAGER", ""),
+                String htmlContent = reportService.generateManagerReport(user.get().getAssigned().getName().replaceFirst("^MANAGER", ""),
                         month, year, response);
-                return new ResponseEntity<>("Report is generated", HttpStatus.OK);
+                response.setContentType("application/pdf");
+                response.setHeader("Content-Disposition", "attachment; filename=ManagerReport(" + month + "-" + year + ").pdf");
+
+                // Convert HTML content to PDF and write to the response output stream
+                try {
+                    HtmlConverter.convertToPdf(htmlContent, response.getOutputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return new ResponseEntity<>("Error generating PDF report", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+
+                return new ResponseEntity<>("Report is being generated and downloaded", HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Access is denied", HttpStatus.FORBIDDEN);
             }
