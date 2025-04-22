@@ -485,7 +485,7 @@ public class ManagerController {
         Integer year = requestBody.get("year");
         if (user.isPresent()) {
             if (user.get().getAssigned().getName().startsWith("MANAGER")) {
-                String htmlContent = reportService.generateManagerReport(user.get().getAssigned().getName().replaceFirst("^MANAGER", ""),
+                String htmlContent = reportService.generateManagerReport(user.get().getAssigned().getName(),
                         month, year, response);
                 response.setContentType("application/pdf");
                 response.setHeader("Content-Disposition", "attachment; filename=ManagerReport(" + month + "-" + year + ").pdf");
